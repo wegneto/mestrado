@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.NoSuchElementException;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +42,24 @@ public class BinarySearchTreeTest {
 		bst.insert(8, 7);
 
 		assertEquals(Integer.valueOf(1), bst.get(5));
+	}
+
+	@Test
+	public void testInsertMultipleNodesTimeout() {
+		bst.insert(5, 1);
+		
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				bst.insert(5, 8);
+			}
+		});
+		t.start();
+		try {
+			t.join(2000);
+		} catch (InterruptedException e) {
+			Assert.assertFalse(t.isAlive());
+		}
+
 	}
 
 	@Test
