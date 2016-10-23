@@ -47,7 +47,7 @@ public class BinarySearchTreeTest {
 	@Test
 	public void testInsertMultipleNodesTimeout() {
 		bst.insert(5, 1);
-		
+
 		Thread t = new Thread(new Runnable() {
 			public void run() {
 				bst.insert(5, 8);
