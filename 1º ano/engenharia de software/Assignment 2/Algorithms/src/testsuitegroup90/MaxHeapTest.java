@@ -54,7 +54,7 @@ public class MaxHeapTest {
 		assertEquals(4, maxHeap.remove());
 		assertEquals(3, maxHeap.remove());
 	}
-
+	
 	@Test
 	public void testIsEmpty() {
 		assertTrue(maxHeap.isEmpty());
