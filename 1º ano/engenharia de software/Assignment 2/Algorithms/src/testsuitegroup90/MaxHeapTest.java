@@ -59,5 +59,5 @@ public class MaxHeapTest {
 	public void testIsEmpty() {
 		assertTrue(maxHeap.isEmpty());
 	}
-
+	
 }

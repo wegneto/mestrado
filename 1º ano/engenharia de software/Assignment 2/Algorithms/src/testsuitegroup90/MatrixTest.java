@@ -76,5 +76,5 @@ public class MatrixTest {
 		assertEquals(0, matrix.get(1, 0));
 		assertEquals(1, matrix.get(1, 1));
 	}
-
+	
 }

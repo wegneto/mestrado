@@ -90,5 +90,5 @@ public class BinarySearchTreeTest {
 	public void testGetExeception() {
 		assertEquals(Integer.valueOf(3), bst.get(7));
 	}
-
+	
 }

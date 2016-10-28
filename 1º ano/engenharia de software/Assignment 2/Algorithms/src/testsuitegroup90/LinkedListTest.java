@@ -77,5 +77,5 @@ public class LinkedListTest {
 			assertEquals(Integer.valueOf(1), integer);
 		}
 	}
-
+	
 }

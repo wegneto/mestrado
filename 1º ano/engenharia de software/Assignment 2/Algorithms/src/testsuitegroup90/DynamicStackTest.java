@@ -54,5 +54,5 @@ public class DynamicStackTest {
 		dynStack.push(Integer.valueOf(10));
 		assertFalse(dynStack.isEmpty());
 	}
-
+	
 }

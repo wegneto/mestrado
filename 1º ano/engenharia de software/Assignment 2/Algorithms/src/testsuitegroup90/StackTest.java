@@ -68,5 +68,5 @@ public class StackTest {
 		}
 		assertTrue(stack.isFull());
 	}
-
+	
 }

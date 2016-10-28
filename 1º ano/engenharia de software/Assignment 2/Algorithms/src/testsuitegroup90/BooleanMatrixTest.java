@@ -31,5 +31,5 @@ public class BooleanMatrixTest {
 		
 		assertEquals(true, booleanMatrix.get(0, 0));
 	}
-
+	
 }
