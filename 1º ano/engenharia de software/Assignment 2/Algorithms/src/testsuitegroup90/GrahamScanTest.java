@@ -27,6 +27,20 @@ public class GrahamScanTest {
 		Point p3 = new Point(-6, -7);
 		assertEquals(GrahamScan.Direction.RightTurn, GrahamScan.getDirection(p1, p2, p3));
 	}
+	
+	@Test
+	public void testGrahamScanRightTurn() {
+		Point[] points = new Point[4];
+		points[0] = new Point(1, 3);
+		points[1] = new Point(-2, -4);
+		points[2] = new Point(-3, -4);
+		points[3] = new Point(-4, -5);
+		List<Point> expected = new ArrayList<>();
+		expected.add(points[3]);
+		expected.add(points[1]);
+		expected.add(points[0]);
+		assertEquals(expected, GrahamScan.grahamScan(points));
+	}
 
 	@Test
 	public void testGrahamScan() {
@@ -48,13 +62,12 @@ public class GrahamScanTest {
 	@Test
 	public void testGrahamScan2() {
 		Point[] points = new Point[3];
-		points[0] = new Point(-3, -2);
-		points[1] = new Point(-4, -5);
-		points[2] = new Point(-6, -7);
+		points[0] = new Point(1, 1);
+		points[1] = new Point(1, 1);
+		points[2] = new Point(1, 1);
 		List<Point> expected = new ArrayList<>();
-		expected.add(points[2]);
-		expected.add(points[1]);
 		expected.add(points[0]);
+		expected.add(points[2]);
 		assertEquals(expected, GrahamScan.grahamScan(points));
 	}
 

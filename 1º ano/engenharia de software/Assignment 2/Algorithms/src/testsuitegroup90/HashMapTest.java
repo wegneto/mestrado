@@ -35,6 +35,12 @@ public class HashMapTest {
 	}
 	
 	@Test
+	public void testGetNull() {
+		hashMap.put(16, 1);
+		assertNull(hashMap.get(32));
+	}
+	
+	@Test
 	public void testPut() {
 		for (int i = 0; i < 20; i++) {
 				hashMap.put(i, i + 1);
