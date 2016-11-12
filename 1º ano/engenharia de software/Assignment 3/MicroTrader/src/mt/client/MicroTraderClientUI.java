@@ -7,6 +7,7 @@ package mt.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.table.DefaultTableModel;
 import mt.Order;
 import mt.comm.ClientComm;
 
@@ -117,11 +118,14 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
         ConnectDialog dialog = new ConnectDialog(this, true, clientComm);
         dialog.setVisible(true);
-        browseUnfulfilledOrders();
+        if (clientComm.isConnected()) {
+            browseUnfulfilledOrders();
+        }
     }//GEN-LAST:event_connectActionPerformed
 
     private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
         clientComm.disconnect();
+        ordersTable.setModel(new DefaultTableModel());
     }//GEN-LAST:event_disconnectActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed

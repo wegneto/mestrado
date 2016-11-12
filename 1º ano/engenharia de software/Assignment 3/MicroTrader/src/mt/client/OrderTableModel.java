@@ -5,7 +5,6 @@
  */
 package mt.client;
 
-import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
@@ -31,7 +30,7 @@ public class OrderTableModel extends DefaultTableModel {
             row.add(order.getStock());
             row.add(order.getNumberOfUnits());
             row.add(order.getPricePerUnit());
-            row.add(order.isBuyOrder());
+            row.add(order.isBuyOrder() ? "Buy" : "Sell");
             
             // Here we add the values in the MODEL !
             addRow(row.toArray());
