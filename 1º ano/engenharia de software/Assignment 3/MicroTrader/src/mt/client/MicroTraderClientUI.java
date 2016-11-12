@@ -13,6 +13,8 @@ import mt.comm.ClientComm;
  */
 public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTraderClient {
 
+    private static ClientComm clientComm;
+    
     /**
      * Creates new form MicroTraderClientUI
      */
@@ -29,16 +31,17 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        menuBar = new javax.swing.JMenuBar();
+        fileMenu = new javax.swing.JMenu();
         connect = new javax.swing.JMenuItem();
         disconnect = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        jSeparator = new javax.swing.JPopupMenu.Separator();
         exit = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Micro Trader");
 
-        jMenu1.setText("File");
+        fileMenu.setText("File");
 
         connect.setText("Connect");
         connect.addActionListener(new java.awt.event.ActionListener() {
@@ -46,7 +49,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                 connectActionPerformed(evt);
             }
         });
-        jMenu1.add(connect);
+        fileMenu.add(connect);
 
         disconnect.setText("Disconnect");
         disconnect.addActionListener(new java.awt.event.ActionListener() {
@@ -54,8 +57,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                 disconnectActionPerformed(evt);
             }
         });
-        jMenu1.add(disconnect);
-        jMenu1.add(jSeparator2);
+        fileMenu.add(disconnect);
+        fileMenu.add(jSeparator);
 
         exit.setText("Exit");
         exit.addActionListener(new java.awt.event.ActionListener() {
@@ -63,11 +66,11 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                 exitActionPerformed(evt);
             }
         });
-        jMenu1.add(exit);
+        fileMenu.add(exit);
 
-        jMenuBar1.add(jMenu1);
+        menuBar.add(fileMenu);
 
-        setJMenuBar(jMenuBar1);
+        setJMenuBar(menuBar);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -80,19 +83,20 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
             .addGap(0, 278, Short.MAX_VALUE)
         );
 
-        pack();
+        setBounds(0, 0, 400, 322);
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
-        // TODO add your handling code here:
+        ConnectDialog dialog = new ConnectDialog(this, true, clientComm);
+        dialog.setVisible(true);
     }//GEN-LAST:event_connectActionPerformed
 
     private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
-        // TODO add your handling code here:
+        clientComm.disconnect();
     }//GEN-LAST:event_disconnectActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
-        // TODO add your handling code here:
+        System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
 
     @Override
@@ -120,6 +124,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         }
         //</editor-fold>
 
+        MicroTraderClientUI.clientComm = clientComm;
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -132,8 +138,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private javax.swing.JMenuItem connect;
     private javax.swing.JMenuItem disconnect;
     private javax.swing.JMenuItem exit;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JPopupMenu.Separator jSeparator;
+    private javax.swing.JMenuBar menuBar;
     // End of variables declaration//GEN-END:variables
 }
