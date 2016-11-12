@@ -7,6 +7,7 @@ package mt.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import mt.Order;
 import mt.comm.ClientComm;
@@ -138,8 +139,13 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     }//GEN-LAST:event_exitActionPerformed
 
     private void placeOrderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtnActionPerformed
-        PlaceOrderForm form = new PlaceOrderForm(this, true, clientComm);
-        form.setVisible(true);
+        if (clientComm.isConnected()) {
+            PlaceOrderForm form = new PlaceOrderForm(this, true, clientComm);
+            form.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "You must be connected to a sever to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+        
     }//GEN-LAST:event_placeOrderBtnActionPerformed
 
     @Override

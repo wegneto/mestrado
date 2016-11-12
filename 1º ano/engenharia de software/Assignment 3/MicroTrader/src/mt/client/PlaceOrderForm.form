@@ -86,7 +86,7 @@
                               <Component id="pricePerUnitTxt" linkSize="2" min="-2" pref="67" max="-2" attributes="0"/>
                               <Component id="nicknameTxt" alignment="0" pref="240" max="32767" attributes="0"/>
                               <Component id="stockTxt" alignment="0" max="32767" attributes="0"/>
-                              <Component id="numerOfUnitsTxt" linkSize="2" alignment="0" min="-2" pref="120" max="-2" attributes="0"/>
+                              <Component id="numberOfUnitsTxt" linkSize="2" alignment="0" min="-2" pref="120" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
@@ -118,7 +118,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="numberLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="numerOfUnitsTxt" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="numberOfUnitsTxt" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -172,7 +172,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="pricePerUnitTxt">
         </Component>
-        <Component class="javax.swing.JTextField" name="numerOfUnitsTxt">
+        <Component class="javax.swing.JTextField" name="numberOfUnitsTxt">
         </Component>
         <Component class="javax.swing.JRadioButton" name="buyRdBtn">
           <Properties>

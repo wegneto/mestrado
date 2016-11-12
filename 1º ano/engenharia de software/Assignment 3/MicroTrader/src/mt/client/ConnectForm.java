@@ -43,6 +43,7 @@ public class ConnectForm extends javax.swing.JDialog {
         connectBtn = new javax.swing.JButton();
         cancelBtn = new javax.swing.JButton();
 
+        setTitle("Connect");
         setResizable(false);
 
         serverLabel.setText("Server:");

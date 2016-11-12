@@ -5,6 +5,7 @@
  */
 package mt.client;
 
+import javax.swing.JOptionPane;
 import mt.Order;
 import mt.comm.ClientComm;
 
@@ -44,7 +45,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
         nicknameTxt = new javax.swing.JTextField();
         stockTxt = new javax.swing.JTextField();
         pricePerUnitTxt = new javax.swing.JTextField();
-        numerOfUnitsTxt = new javax.swing.JTextField();
+        numberOfUnitsTxt = new javax.swing.JTextField();
         buyRdBtn = new javax.swing.JRadioButton();
         sellRdBtn = new javax.swing.JRadioButton();
         cancelBtn = new javax.swing.JButton();
@@ -91,7 +92,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                             .addComponent(pricePerUnitTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(nicknameTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
                             .addComponent(stockTxt)
-                            .addComponent(numerOfUnitsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(numberOfUnitsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(46, 46, 46)
                         .addComponent(operationLabel)
@@ -102,7 +103,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {numerOfUnitsTxt, pricePerUnitTxt});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {numberOfUnitsTxt, pricePerUnitTxt});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -118,7 +119,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(numberLabel)
-                    .addComponent(numerOfUnitsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(numberOfUnitsTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(priceLabel)
@@ -182,14 +183,50 @@ public class PlaceOrderForm extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelBtnActionPerformed
 
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
-        Order order = null;
-        if (buyRdBtn.isSelected()) {
-            order = Order.createBuyOrder(nicknameTxt.getText(), stockTxt.getText(), Integer.valueOf(numerOfUnitsTxt.getText()), Double.valueOf(pricePerUnitTxt.getText()));
-        } else if (sellRdBtn.isSelected()) {
-            order = Order.createSellOrder(nicknameTxt.getText(), stockTxt.getText(), Integer.valueOf(numerOfUnitsTxt.getText()), Double.valueOf(pricePerUnitTxt.getText()));
+        if (clientComm.isConnected()) {
+            String message = "";
+
+            if (nicknameTxt.getText().isEmpty()) {
+                message = "Nickname must be provided.";
+            }
+            
+            if (stockTxt.getText().isEmpty()) {
+                message = (message.isEmpty() ? "" : message + "\n" ) + "Stock must be provided.";
+            }
+
+            if (numberOfUnitsTxt.getText().isEmpty()) {
+                message = (message.isEmpty() ? "" : message + "\n" ) + "Numbers of units must be provided.";
+            }
+
+            if (pricePerUnitTxt.getText().isEmpty()) {
+                message = (message.isEmpty() ? "" : message + "\n" ) + "Price per unit must be provided.";
+            }
+
+            if ((!buyRdBtn.isSelected() && (!sellRdBtn.isSelected()))) {
+                message = (message.isEmpty() ? "" : message + "\n" ) + "Operation must be provided.";
+            }
+            
+            if (!message.isEmpty()) {
+                JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+
+            Order order = null;
+            String nickname = nicknameTxt.getText();
+            String stock = stockTxt.getText();
+            int numberOfUnits = Integer.valueOf(numberOfUnitsTxt.getText());
+            double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText());
+
+            if (buyRdBtn.isSelected()) {
+                order = Order.createBuyOrder(nicknameTxt.getText(), stockTxt.getText(), Integer.valueOf(numberOfUnitsTxt.getText()), Double.valueOf(pricePerUnitTxt.getText()));
+            } else if (sellRdBtn.isSelected()) {
+                order = Order.createSellOrder(nicknameTxt.getText(), stockTxt.getText(), Integer.valueOf(numberOfUnitsTxt.getText()), Double.valueOf(pricePerUnitTxt.getText()));
+            }
+
+            clientComm.sendOrder(order);
+            this.setVisible(false);
+        } else {
+            JOptionPane.showMessageDialog(this, "You're not connected to any server.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        System.out.println(order);
-        clientComm.sendOrder(order);
     }//GEN-LAST:event_okBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -200,7 +237,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
     private javax.swing.JLabel nicknameLabel;
     private javax.swing.JTextField nicknameTxt;
     private javax.swing.JLabel numberLabel;
-    private javax.swing.JTextField numerOfUnitsTxt;
+    private javax.swing.JTextField numberOfUnitsTxt;
     private javax.swing.JButton okBtn;
     private javax.swing.JLabel operationLabel;
     private javax.swing.JLabel priceLabel;
