@@ -121,6 +121,7 @@ public class ConnectDialog extends javax.swing.JDialog {
     private void connectBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectBtnActionPerformed
         try {
             clientComm.connect((String) servers.getSelectedItem(), username.getText());
+            this.setVisible(false);
         } catch (IOException ex) {
             Logger.getLogger(ConnectDialog.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -5,6 +5,9 @@
  */
 package mt.client;
 
+import java.util.ArrayList;
+import java.util.List;
+import mt.Order;
 import mt.comm.ClientComm;
 
 /**
@@ -14,7 +17,7 @@ import mt.comm.ClientComm;
 public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTraderClient {
 
     private static ClientComm clientComm;
-    
+
     /**
      * Creates new form MicroTraderClientUI
      */
@@ -31,6 +34,9 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        ordersTable = new javax.swing.JTable();
+        placeOrderBtn = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         connect = new javax.swing.JMenuItem();
@@ -40,6 +46,18 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Micro Trader");
+
+        ordersTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane1.setViewportView(ordersTable);
+
+        placeOrderBtn.setText("Place Order");
 
         fileMenu.setText("File");
 
@@ -76,19 +94,30 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(placeOrderBtn)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 278, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(32, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(placeOrderBtn)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18))
         );
 
-        setBounds(0, 0, 400, 322);
+        setBounds(0, 0, 633, 322);
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
         ConnectDialog dialog = new ConnectDialog(this, true, clientComm);
         dialog.setVisible(true);
+        browseUnfulfilledOrders();
     }//GEN-LAST:event_connectActionPerformed
 
     private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
@@ -125,7 +154,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         //</editor-fold>
 
         MicroTraderClientUI.clientComm = clientComm;
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -139,7 +168,23 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private javax.swing.JMenuItem disconnect;
     private javax.swing.JMenuItem exit;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JTable ordersTable;
+    private javax.swing.JButton placeOrderBtn;
     // End of variables declaration//GEN-END:variables
+
+    private void browseUnfulfilledOrders() {
+        List<Order> orders = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            if (i % 2 == 0) {
+                orders.add(Order.createBuyOrder("user " + i, "stock " + i, i, i));
+            } else {
+                orders.add(Order.createSellOrder("user " + i, "stock " + i, i, i));
+            }
+        }
+
+        ordersTable.setModel(new OrderTableModel(orders));
+    }
 }
