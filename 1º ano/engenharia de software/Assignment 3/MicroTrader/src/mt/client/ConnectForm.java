@@ -14,14 +14,14 @@ import mt.comm.ClientComm;
  *
  * @author wegneto
  */
-public class ConnectDialog extends javax.swing.JDialog {
+public class ConnectForm extends javax.swing.JDialog {
 
     private ClientComm clientComm;
 
     /**
      * Creates new form ConnectDialog
      */
-    public ConnectDialog(java.awt.Frame parent, boolean modal, ClientComm clientComm) {
+    public ConnectForm(java.awt.Frame parent, boolean modal, ClientComm clientComm) {
         super(parent, modal);
         initComponents();
         this.clientComm = clientComm;
@@ -123,7 +123,7 @@ public class ConnectDialog extends javax.swing.JDialog {
             clientComm.connect((String) servers.getSelectedItem(), username.getText());
             this.setVisible(false);
         } catch (IOException ex) {
-            Logger.getLogger(ConnectDialog.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ConnectForm.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_connectBtnActionPerformed
 

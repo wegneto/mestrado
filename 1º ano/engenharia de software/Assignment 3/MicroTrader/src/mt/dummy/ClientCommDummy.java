@@ -1,5 +1,7 @@
 package mt.dummy;
 
+import java.util.ArrayList;
+import java.util.List;
 import mt.Order;
 import mt.comm.ClientComm;
 import mt.comm.ClientSideMessage;
@@ -7,6 +9,8 @@ import mt.comm.ClientSideMessage;
 public class ClientCommDummy implements ClientComm {
     
     private static boolean isConnected = false;
+    
+    private static List<Order> orders = new ArrayList<>();
 
     @Override
     public void connect(String serverAddress, String nickname) {
@@ -39,8 +43,7 @@ public class ClientCommDummy implements ClientComm {
 
     @Override
     public void sendOrder(Order order) {
-        // TODO Auto-generated method stub
-
+        orders.add(order);
     }
 
 }

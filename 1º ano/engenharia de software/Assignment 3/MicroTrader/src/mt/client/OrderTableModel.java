@@ -24,7 +24,7 @@ public class OrderTableModel extends DefaultTableModel {
         addColumn("Type");
         
         for (Order order : orders) {
-            List<Object> row = new LinkedList<Object>();
+            List<Object> row = new LinkedList<>();
 
             row.add(order.getNickname());
             row.add(order.getStock());
@@ -32,7 +32,6 @@ public class OrderTableModel extends DefaultTableModel {
             row.add(order.getPricePerUnit());
             row.add(order.isBuyOrder() ? "Buy" : "Sell");
             
-            // Here we add the values in the MODEL !
             addRow(row.toArray());
         }
         
