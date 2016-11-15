@@ -17,6 +17,7 @@ import mt.Order;
 public class OrderTableModel extends DefaultTableModel {
     
     public OrderTableModel(List<Order> orders) {
+        addColumn("Id");
         addColumn("Nickname");
         addColumn("Stock");
         addColumn("Units");
@@ -26,6 +27,7 @@ public class OrderTableModel extends DefaultTableModel {
         for (Order order : orders) {
             List<Object> row = new LinkedList<>();
 
+            row.add(order.getServerOrderID());
             row.add(order.getNickname());
             row.add(order.getStock());
             row.add(order.getNumberOfUnits());

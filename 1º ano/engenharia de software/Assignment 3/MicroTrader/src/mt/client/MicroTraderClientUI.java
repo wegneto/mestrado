@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import mt.Order;
 import mt.comm.ClientComm;
+import mt.comm.ClientSideMessage;
 
 /**
  *
@@ -19,6 +20,8 @@ import mt.comm.ClientComm;
 public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTraderClient {
 
     private static ClientComm clientComm;
+
+    private static List<Order> orders = new ArrayList<>();
 
     /**
      * Creates new form MicroTraderClientUI
@@ -39,6 +42,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         jScrollPane1 = new javax.swing.JScrollPane();
         ordersTable = new javax.swing.JTable();
         placeOrderBtn = new javax.swing.JButton();
+        updateBtn = new javax.swing.JButton();
+        placeOrderBtn1 = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         connect = new javax.swing.JMenuItem();
@@ -63,6 +68,20 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         placeOrderBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 placeOrderBtnActionPerformed(evt);
+            }
+        });
+
+        updateBtn.setText("Update");
+        updateBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateBtnActionPerformed(evt);
+            }
+        });
+
+        placeOrderBtn1.setText("Test");
+        placeOrderBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                placeOrderBtn1ActionPerformed(evt);
             }
         });
 
@@ -103,8 +122,13 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(placeOrderBtn)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(placeOrderBtn1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(updateBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(placeOrderBtn))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -114,7 +138,10 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(placeOrderBtn)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(placeOrderBtn)
+                    .addComponent(updateBtn)
+                    .addComponent(placeOrderBtn1))
                 .addContainerGap(9, Short.MAX_VALUE))
         );
 
@@ -125,7 +152,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         ConnectForm form = new ConnectForm(this, true, clientComm);
         form.setVisible(true);
         if (clientComm.isConnected()) {
-            browseUnfulfilledOrders();
+            browseOrders();
         }
     }//GEN-LAST:event_connectActionPerformed
 
@@ -145,8 +172,21 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         } else {
             JOptionPane.showMessageDialog(this, "You must be connected to a sever to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
-        
+
     }//GEN-LAST:event_placeOrderBtnActionPerformed
+
+    private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
+        browseOrders();
+    }//GEN-LAST:event_updateBtnActionPerformed
+
+    private void placeOrderBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtn1ActionPerformed
+        if (clientComm.isConnected()) {
+            TestPlaceOrderForm form = new TestPlaceOrderForm(this, true, clientComm);
+            form.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "You must be connected to a sever to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_placeOrderBtn1ActionPerformed
 
     @Override
     public void start(ClientComm clientComm) {
@@ -193,15 +233,32 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JTable ordersTable;
     private javax.swing.JButton placeOrderBtn;
+    private javax.swing.JButton placeOrderBtn1;
+    private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
 
-    private void browseUnfulfilledOrders() {
-        List<Order> orders = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            if (i % 2 == 0) {
-                orders.add(Order.createBuyOrder("user " + i, "stock " + i, i, i));
-            } else {
-                orders.add(Order.createSellOrder("user " + i, "stock " + i, i, i));
+    private void browseOrders() {
+        while (clientComm.hasNextMessage()) {
+            ClientSideMessage message = clientComm.getNextMessage();
+
+            if (message != null && message.getType() == ClientSideMessage.Type.ORDER) {
+                int index = -1;
+
+                for (Order order : orders) {
+                    if (order.getServerOrderID() == message.getOrder().getServerOrderID()) {
+                        index = orders.indexOf(order);
+                    }
+                }
+
+                if (index != -1) {
+                    if (message.getOrder().getNumberOfUnits() == 0) {
+                        orders.remove(index);
+                    } else {
+                        orders.get(index).setNumberOfUnits(message.getOrder().getNumberOfUnits());
+                    }
+                } else {
+                    orders.add(message.getOrder());
+                }
             }
         }
 

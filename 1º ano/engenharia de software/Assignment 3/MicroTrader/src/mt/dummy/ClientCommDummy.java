@@ -9,13 +9,26 @@ import mt.comm.ClientSideMessage;
 public class ClientCommDummy implements ClientComm {
     
     private static boolean isConnected = false;
+       
+    private static List<Order> buffer = new ArrayList<>();
     
-    private static List<Order> orders = new ArrayList<>();
+    private static int serverOrderID = 1;
 
     @Override
     public void connect(String serverAddress, String nickname) {
         System.out.println("connecting " + nickname + " to server " + serverAddress);
         isConnected = true;
+        createDummyData();
+    }
+    
+    private void createDummyData() {
+        for (int i = 1; i <= 5; i++) {
+            if (i % 2 == 0) {
+                this.sendOrder(Order.createBuyOrder("user " + i, "stock " + i, i, i));
+            } else {
+                this.sendOrder(Order.createSellOrder("user " + i, "stock " + i, i, i));
+            }
+        }
     }
 
     @Override
@@ -31,19 +44,27 @@ public class ClientCommDummy implements ClientComm {
 
     @Override
     public boolean hasNextMessage() {
-        // TODO Auto-generated method stub
-        return false;
+        return (buffer.size()) > 0;
     }
 
     @Override
     public ClientSideMessage getNextMessage() {
-        // TODO Auto-generated method stub
-        return null;
+        if (hasNextMessage()) {
+            ClientSideMessageDummy cms = new ClientSideMessageDummy(buffer.remove(0));
+            return cms;
+        } else { 
+            return null;
+        }
     }
 
     @Override
     public void sendOrder(Order order) {
-        orders.add(order);
+        if (order.getServerOrderID() == 0) {
+            order.setServerOrderID(serverOrderID);
+            serverOrderID++;
+        }
+        
+        buffer.add(order);
     }
 
 }

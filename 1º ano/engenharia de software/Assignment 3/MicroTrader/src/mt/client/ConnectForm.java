@@ -8,6 +8,7 @@ package mt.client;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import mt.comm.ClientComm;
 
 /**
@@ -48,7 +49,7 @@ public class ConnectForm extends javax.swing.JDialog {
 
         serverLabel.setText("Server:");
 
-        usernameLabel.setText("Username:");
+        usernameLabel.setText("Nickname:");
 
         servers.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Server 1", "Server 2", "Server 3", "Server 4" }));
         servers.addActionListener(new java.awt.event.ActionListener() {
@@ -120,6 +121,17 @@ public class ConnectForm extends javax.swing.JDialog {
     }//GEN-LAST:event_serversActionPerformed
 
     private void connectBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectBtnActionPerformed
+        String message = "";
+
+        if (username.getText().isEmpty()) {
+            message = "Nickname must be provided.";
+        }
+
+        if (!message.isEmpty()) {
+            JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         try {
             clientComm.connect((String) servers.getSelectedItem(), username.getText());
             this.setVisible(false);
