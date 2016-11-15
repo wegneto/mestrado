@@ -5,9 +5,13 @@
  */
 package mt.client;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.Order;
 import mt.comm.ClientComm;
@@ -238,30 +242,36 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     // End of variables declaration//GEN-END:variables
 
     private void browseOrders() {
-        while (clientComm.hasNextMessage()) {
-            ClientSideMessage message = clientComm.getNextMessage();
+        Timer timer = new Timer(125, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                while (clientComm.hasNextMessage()) {
+                    ClientSideMessage message = clientComm.getNextMessage();
 
-            if (message != null && message.getType() == ClientSideMessage.Type.ORDER) {
-                int index = -1;
+                    if (message != null && message.getType() == ClientSideMessage.Type.ORDER) {
+                        int index = -1;
 
-                for (Order order : orders) {
-                    if (order.getServerOrderID() == message.getOrder().getServerOrderID()) {
-                        index = orders.indexOf(order);
+                        for (Order order : orders) {
+                            if (order.getServerOrderID() == message.getOrder().getServerOrderID()) {
+                                index = orders.indexOf(order);
+                            }
+                        }
+
+                        if (index != -1) {
+                            if (message.getOrder().getNumberOfUnits() == 0) {
+                                orders.remove(index);
+                            } else {
+                                orders.get(index).setNumberOfUnits(message.getOrder().getNumberOfUnits());
+                            }
+                        } else {
+                            orders.add(message.getOrder());
+                        }
                     }
                 }
 
-                if (index != -1) {
-                    if (message.getOrder().getNumberOfUnits() == 0) {
-                        orders.remove(index);
-                    } else {
-                        orders.get(index).setNumberOfUnits(message.getOrder().getNumberOfUnits());
-                    }
-                } else {
-                    orders.add(message.getOrder());
-                }
+                ordersTable.setModel(new OrderTableModel(orders));
             }
-        }
-
-        ordersTable.setModel(new OrderTableModel(orders));
+        });
+        timer.start();
     }
 }
