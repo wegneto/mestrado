@@ -6,6 +6,7 @@
 package mt.client;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -40,7 +41,7 @@ public class ConnectForm extends javax.swing.JDialog {
         serverLabel = new javax.swing.JLabel();
         usernameLabel = new javax.swing.JLabel();
         servers = new javax.swing.JComboBox<>();
-        username = new javax.swing.JTextField();
+        nickname = new javax.swing.JTextField();
         connectBtn = new javax.swing.JButton();
         cancelBtn = new javax.swing.JButton();
 
@@ -91,7 +92,7 @@ public class ConnectForm extends javax.swing.JDialog {
                             .addComponent(usernameLabel, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(username)
+                            .addComponent(nickname)
                             .addComponent(servers, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(6, 6, 6))))
         );
@@ -105,7 +106,7 @@ public class ConnectForm extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(usernameLabel)
-                    .addComponent(username, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nickname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(connectBtn)
@@ -123,7 +124,7 @@ public class ConnectForm extends javax.swing.JDialog {
     private void connectBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectBtnActionPerformed
         String message = "";
 
-        if (username.getText().isEmpty()) {
+        if (nickname.getText().isEmpty()) {
             message = "Nickname must be provided.";
         }
 
@@ -133,13 +134,20 @@ public class ConnectForm extends javax.swing.JDialog {
         }
 
         try {
-            clientComm.connect((String) servers.getSelectedItem(), username.getText());
+            clientComm.connect((String) servers.getSelectedItem(), nickname.getText().trim());
             this.setVisible(false);
+        } catch (UnknownHostException uhe) {
+            Logger.getLogger(ConnectForm.class.getName()).log(Level.SEVERE, null, uhe);
         } catch (IOException ex) {
             Logger.getLogger(ConnectForm.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_connectBtnActionPerformed
 
+    
+    public String getNickname() {
+        return nickname.getText().trim();
+    }
+    
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
         this.setVisible(false);
     }//GEN-LAST:event_cancelBtnActionPerformed
@@ -147,9 +155,9 @@ public class ConnectForm extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelBtn;
     private javax.swing.JButton connectBtn;
+    private javax.swing.JTextField nickname;
     private javax.swing.JLabel serverLabel;
     private javax.swing.JComboBox<String> servers;
-    private javax.swing.JTextField username;
     private javax.swing.JLabel usernameLabel;
     // End of variables declaration//GEN-END:variables
 }

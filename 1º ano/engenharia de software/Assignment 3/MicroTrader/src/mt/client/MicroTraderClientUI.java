@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.Order;
@@ -26,6 +25,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private static ClientComm clientComm;
 
     private static List<Order> orders = new ArrayList<>();
+    
+    private static String nickname;
 
     /**
      * Creates new form MicroTraderClientUI
@@ -46,7 +47,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         jScrollPane1 = new javax.swing.JScrollPane();
         ordersTable = new javax.swing.JTable();
         placeOrderBtn = new javax.swing.JButton();
-        updateBtn = new javax.swing.JButton();
         placeOrderBtn1 = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
@@ -72,13 +72,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         placeOrderBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 placeOrderBtnActionPerformed(evt);
-            }
-        });
-
-        updateBtn.setText("Update");
-        updateBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateBtnActionPerformed(evt);
             }
         });
 
@@ -130,8 +123,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(placeOrderBtn1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(updateBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(placeOrderBtn))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -144,7 +135,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(placeOrderBtn)
-                    .addComponent(updateBtn)
                     .addComponent(placeOrderBtn1))
                 .addContainerGap(9, Short.MAX_VALUE))
         );
@@ -156,6 +146,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         ConnectForm form = new ConnectForm(this, true, clientComm);
         form.setVisible(true);
         if (clientComm.isConnected()) {
+            nickname = form.getNickname();
             browseOrders();
         }
     }//GEN-LAST:event_connectActionPerformed
@@ -171,17 +162,13 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
     private void placeOrderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtnActionPerformed
         if (clientComm.isConnected()) {
-            PlaceOrderForm form = new PlaceOrderForm(this, true, clientComm);
+            PlaceOrderForm form = new PlaceOrderForm(this, true, clientComm, nickname);
             form.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "You must be connected to a sever to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
 
     }//GEN-LAST:event_placeOrderBtnActionPerformed
-
-    private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
-        browseOrders();
-    }//GEN-LAST:event_updateBtnActionPerformed
 
     private void placeOrderBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtn1ActionPerformed
         if (clientComm.isConnected()) {
@@ -238,11 +225,10 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private javax.swing.JTable ordersTable;
     private javax.swing.JButton placeOrderBtn;
     private javax.swing.JButton placeOrderBtn1;
-    private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
 
     private void browseOrders() {
-        Timer timer = new Timer(125, new ActionListener() {
+        Timer timer = new Timer(500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 while (clientComm.hasNextMessage()) {

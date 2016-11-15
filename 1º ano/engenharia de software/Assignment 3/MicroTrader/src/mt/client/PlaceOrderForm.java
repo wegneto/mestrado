@@ -23,14 +23,17 @@ import mt.comm.ClientComm;
 public class PlaceOrderForm extends javax.swing.JDialog {
 
     private final ClientComm clientComm;
+    
+    private final String nickname;
 
     /**
      * Creates new form PlaceOrderForm
      */
-    public PlaceOrderForm(java.awt.Frame parent, boolean modal, ClientComm clientComm) {
+    public PlaceOrderForm(java.awt.Frame parent, boolean modal, ClientComm clientComm, String nickname) {
         super(parent, modal);
-        initComponents();
         this.clientComm = clientComm;
+        this.nickname = nickname;
+        initComponents();
     }
 
     /**
@@ -49,12 +52,12 @@ public class PlaceOrderForm extends javax.swing.JDialog {
         numberLabel = new javax.swing.JLabel();
         priceLabel = new javax.swing.JLabel();
         operationLabel = new javax.swing.JLabel();
-        nicknameTxt = new javax.swing.JTextField();
         stockTxt = new javax.swing.JTextField();
         buyRdBtn = new javax.swing.JRadioButton();
         sellRdBtn = new javax.swing.JRadioButton();
         numberOfUnitsTxt = new javax.swing.JTextField();
         pricePerUnitTxt = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
         cancelBtn = new javax.swing.JButton();
         okBtn = new javax.swing.JButton();
 
@@ -73,8 +76,6 @@ public class PlaceOrderForm extends javax.swing.JDialog {
 
         operationLabel.setText("Operation:");
 
-        nicknameTxt.setSize(new java.awt.Dimension(60, 26));
-
         buttonGroup2.add(buyRdBtn);
         buyRdBtn.setText("Buy");
 
@@ -82,6 +83,8 @@ public class PlaceOrderForm extends javax.swing.JDialog {
         sellRdBtn.setText("Sell");
 
         numberOfUnitsTxt.setColumns(5);
+
+        jLabel1.setText(nickname);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -98,12 +101,11 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                             .addComponent(priceLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(nicknameTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
-                                .addComponent(stockTxt))
+                            .addComponent(stockTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                 .addComponent(pricePerUnitTxt, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(numberOfUnitsTxt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))))
+                                .addComponent(numberOfUnitsTxt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
+                            .addComponent(jLabel1)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(46, 46, 46)
                         .addComponent(operationLabel)
@@ -116,10 +118,10 @@ public class PlaceOrderForm extends javax.swing.JDialog {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(11, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(nicknameLabel)
-                    .addComponent(nicknameTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(stockLabel)
@@ -162,7 +164,6 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(okBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cancelBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -193,10 +194,6 @@ public class PlaceOrderForm extends javax.swing.JDialog {
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
         if (clientComm.isConnected()) {
             String message = "";
-
-            if (nicknameTxt.getText().isEmpty()) {
-                message = "Nickname must be provided.";
-            }
 
             if (stockTxt.getText().isEmpty()) {
                 message = (message.isEmpty() ? "" : message + "\n") + "Stock must be provided.";
@@ -242,7 +239,6 @@ public class PlaceOrderForm extends javax.swing.JDialog {
             }
 
             Order order = null;
-            String nickname = nicknameTxt.getText();
             String stock = stockTxt.getText();
             int numberOfUnits = Integer.valueOf(numberOfUnitsTxt.getText());
             double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText());
@@ -266,9 +262,9 @@ public class PlaceOrderForm extends javax.swing.JDialog {
     private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JRadioButton buyRdBtn;
     private javax.swing.JButton cancelBtn;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel nicknameLabel;
-    private javax.swing.JTextField nicknameTxt;
     private javax.swing.JLabel numberLabel;
     private javax.swing.JTextField numberOfUnitsTxt;
     private javax.swing.JButton okBtn;
