@@ -5,14 +5,7 @@
  */
 package mt.client;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
-import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
-import javax.swing.text.InternationalFormatter;
-import javax.swing.text.NumberFormatter;
 import mt.Order;
 import mt.comm.ClientComm;
 

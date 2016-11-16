@@ -18,7 +18,7 @@ import mt.comm.ClientComm;
  */
 public class ConnectForm extends javax.swing.JDialog {
 
-    private ClientComm clientComm;
+    private final ClientComm clientComm;
 
     /**
      * Creates new form ConnectDialog
