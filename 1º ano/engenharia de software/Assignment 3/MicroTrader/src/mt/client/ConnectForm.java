@@ -1,14 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mt.client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import mt.comm.ClientComm;
 
@@ -40,10 +33,10 @@ public class ConnectForm extends javax.swing.JDialog {
 
         serverLabel = new javax.swing.JLabel();
         usernameLabel = new javax.swing.JLabel();
-        nickname = new javax.swing.JTextField();
+        nicknameTxt = new javax.swing.JTextField();
         connectBtn = new javax.swing.JButton();
         cancelBtn = new javax.swing.JButton();
-        serverName = new javax.swing.JTextField();
+        serverNameTxt = new javax.swing.JTextField();
 
         setTitle("Connect");
         setResizable(false);
@@ -86,10 +79,10 @@ public class ConnectForm extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(nickname)
+                                .addComponent(nicknameTxt)
                                 .addGap(6, 6, 6))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(serverName)
+                                .addComponent(serverNameTxt)
                                 .addContainerGap())))))
         );
         layout.setVerticalGroup(
@@ -98,11 +91,11 @@ public class ConnectForm extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(serverLabel)
-                    .addComponent(serverName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(serverNameTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(usernameLabel)
-                    .addComponent(nickname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nicknameTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(connectBtn)
@@ -116,11 +109,11 @@ public class ConnectForm extends javax.swing.JDialog {
     private void connectBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectBtnActionPerformed
         String message = "";
 
-        if (serverName.getText().isEmpty()) {
+        if (serverNameTxt.getText().isEmpty()) {
             message = "Server must be provided.";
         }
         
-        if (nickname.getText().isEmpty()) {
+        if (nicknameTxt.getText().isEmpty()) {
             message = "Nickname must be provided.";
         }
 
@@ -129,10 +122,10 @@ public class ConnectForm extends javax.swing.JDialog {
             return;
         }
         
-        String server = serverName.getText().trim();
+        String server = serverNameTxt.getText().trim();
 
         try {
-            clientComm.connect((String) server, nickname.getText().trim());
+            clientComm.connect((String) server, nicknameTxt.getText().trim());
             this.setVisible(false);
         } catch (UnknownHostException uhe) {
             JOptionPane.showMessageDialog(this, String.format("Server '%s' not found", server), "Error",
@@ -144,7 +137,7 @@ public class ConnectForm extends javax.swing.JDialog {
     }//GEN-LAST:event_connectBtnActionPerformed
 
     public String getNickname() {
-        return nickname.getText().trim();
+        return nicknameTxt.getText().trim();
     }
 
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
@@ -154,9 +147,9 @@ public class ConnectForm extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelBtn;
     private javax.swing.JButton connectBtn;
-    private javax.swing.JTextField nickname;
+    private javax.swing.JTextField nicknameTxt;
     private javax.swing.JLabel serverLabel;
-    private javax.swing.JTextField serverName;
+    private javax.swing.JTextField serverNameTxt;
     private javax.swing.JLabel usernameLabel;
     // End of variables declaration//GEN-END:variables
 }

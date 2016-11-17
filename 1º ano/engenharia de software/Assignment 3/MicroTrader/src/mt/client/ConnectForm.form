@@ -42,11 +42,11 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <Component id="nickname" max="32767" attributes="0"/>
+                              <Component id="nicknameTxt" max="32767" attributes="0"/>
                               <EmptySpace min="6" pref="6" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
-                              <Component id="serverName" max="32767" attributes="0"/>
+                              <Component id="serverNameTxt" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -61,12 +61,12 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="serverLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="serverName" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="serverNameTxt" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="usernameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="nickname" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="nicknameTxt" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -89,7 +89,7 @@
         <Property name="text" type="java.lang.String" value="Nickname:"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="nickname">
+    <Component class="javax.swing.JTextField" name="nicknameTxt">
     </Component>
     <Component class="javax.swing.JButton" name="connectBtn">
       <Properties>
@@ -107,7 +107,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelBtnActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JTextField" name="serverName">
+    <Component class="javax.swing.JTextField" name="serverNameTxt">
     </Component>
   </SubComponents>
 </Form>
