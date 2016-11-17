@@ -155,12 +155,17 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
-        ConnectForm form = new ConnectForm(this, true, clientComm);
-        form.setVisible(true);
-        if (clientComm.isConnected()) {
-            nickname = form.getNickname();
-            browseOrders();
+        if (!clientComm.isConnected()) {
+            ConnectForm form = new ConnectForm(this, true, clientComm);
+            form.setVisible(true);
+            if (clientComm.isConnected()) {
+                nickname = form.getNickname();
+                browseOrders();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "You are already connected to a server. \nNavigate to File > Disconnect before connecting with new nickname.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
+
     }//GEN-LAST:event_connectActionPerformed
 
     private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
