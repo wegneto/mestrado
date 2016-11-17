@@ -7,6 +7,7 @@ package mt.client;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.table.DefaultTableModel;
 import mt.Order;
 
@@ -30,8 +31,8 @@ public class OrderTableModel extends DefaultTableModel {
             row.add(order.getServerOrderID());
             row.add(order.getNickname());
             row.add(order.getStock());
-            row.add(order.getNumberOfUnits());
-            row.add(order.getPricePerUnit());
+            row.add(String.format(Locale.ENGLISH, "%,d", order.getNumberOfUnits()));
+            row.add(String.format(Locale.ENGLISH, "%,.2f", order.getPricePerUnit()));
             row.add(order.isBuyOrder() ? "Buy" : "Sell");
             
             addRow(row.toArray());
