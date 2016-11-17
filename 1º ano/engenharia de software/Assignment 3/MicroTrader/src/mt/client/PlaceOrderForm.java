@@ -196,14 +196,14 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be provided.";
             } else {
                 try {
-                    long numberOfUnits = Long.valueOf(numberOfUnitsTxt.getText());
+                    long numberOfUnits = Long.valueOf(numberOfUnitsTxt.getText().trim());
                     if (numberOfUnits <= 0) {
                         message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be greater than 0.";
                     } else if (numberOfUnits > Integer.MAX_VALUE) {
                         message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be less than " + Integer.MAX_VALUE + ".";
                     }
                 } catch (NumberFormatException e) {
-                    message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be a number";
+                    message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be a integer";
                 }
             }
 
@@ -211,14 +211,14 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be provided.";
             } else {
                 try {
-                    double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText());
+                    double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText().trim());
                     if (pricePerUnit <= 0) {
                         message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be greater than 0.";
                     } else if (pricePerUnit > Double.MAX_VALUE) {
                         message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be less than " + Integer.MAX_VALUE + ".";
                     }
                 } catch (NumberFormatException e) {
-                    message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be a number";
+                    message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be an number";
                 }
             }
 
@@ -233,8 +233,8 @@ public class PlaceOrderForm extends javax.swing.JDialog {
 
             Order order = null;
             String stock = stockTxt.getText();
-            int numberOfUnits = Integer.valueOf(numberOfUnitsTxt.getText());
-            double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText());
+            int numberOfUnits = Integer.valueOf(numberOfUnitsTxt.getText().trim());
+            double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText().trim());
 
             if (buyRdBtn.isSelected()) {
                 order = Order.createBuyOrder(nickname, stock, numberOfUnits, pricePerUnit);
