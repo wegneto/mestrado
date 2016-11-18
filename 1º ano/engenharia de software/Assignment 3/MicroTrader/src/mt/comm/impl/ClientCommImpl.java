@@ -37,22 +37,24 @@ public class ClientCommImpl implements ClientComm {
 
 	@Override
 	public boolean isConnected() {
-		return clientSocket.isConnected();
+		return clientSocket != null && clientSocket.isConnected();
 	}
 
 	@Override
 	public void disconnect() {
-		clientSocket.disconnect();
+		if (isConnected()) {
+			clientSocket.disconnect();
+		}
 	}
 
 	@Override
 	public ClientSideMessage getNextMessage() {
 		ClientSideMessage nextMessage = null;
-		if(!isConnected()){
+		if (!isConnected()) {
 			System.out.println("ClientComm >> The client is no longer connected, so a null client message is sent to inform GUI.");
 			return null;
 		}
-		
+
 		try {
 			nextMessage = clientMessages.take();
 		} catch (InterruptedException e) {
@@ -68,6 +70,8 @@ public class ClientCommImpl implements ClientComm {
 
 	@Override
 	public void sendOrder(Order order) {
-		clientSocket.sendOrder(order);
+		if (clientSocket != null) {
+			clientSocket.sendOrder(order);
+		}
 	}
 }

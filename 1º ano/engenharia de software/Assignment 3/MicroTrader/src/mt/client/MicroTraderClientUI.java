@@ -24,6 +24,10 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
     private static String nickname;
 
+    private Timer timer;
+
+    private final String screenTitle = "Micro Trader";
+
     /**
      * Creates new form MicroTraderClientUI
      */
@@ -39,7 +43,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private void initComponents() {
 
         placeOrderBtn = new javax.swing.JButton();
-        placeOrderBtn1 = new javax.swing.JButton();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         unfulfilledOrdersScrollPane = new javax.swing.JScrollPane();
         unfulfilledOrdersTable = new javax.swing.JTable();
@@ -53,20 +56,13 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         exit = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Micro Trader");
+        setTitle(screenTitle + " | (Disconnected)");
         setResizable(false);
 
         placeOrderBtn.setText("Place Order");
         placeOrderBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 placeOrderBtnActionPerformed(evt);
-            }
-        });
-
-        placeOrderBtn1.setText("Test");
-        placeOrderBtn1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                placeOrderBtn1ActionPerformed(evt);
             }
         });
 
@@ -132,9 +128,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(placeOrderBtn1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(placeOrderBtn))
                     .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE))
                 .addContainerGap())
@@ -145,9 +139,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                 .addContainerGap(8, Short.MAX_VALUE)
                 .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(placeOrderBtn1)
-                    .addComponent(placeOrderBtn))
+                .addComponent(placeOrderBtn)
                 .addGap(6, 6, 6))
         );
 
@@ -160,6 +152,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
             form.setVisible(true);
             if (clientComm.isConnected()) {
                 nickname = form.getNickname();
+                setTitle(screenTitle + " | Connected user: " + nickname);
                 browseOrders();
             }
         } else {
@@ -169,8 +162,16 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     }//GEN-LAST:event_connectActionPerformed
 
     private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
-        clientComm.disconnect();
-        unfulfilledOrdersTable.setModel(new DefaultTableModel());
+        if (clientComm.isConnected()) {
+            clientComm.disconnect();
+            timer.stop();
+            unfulfilledOrdersTable.setModel(new DefaultTableModel());
+            myOrdersTable.setModel(new DefaultTableModel());
+            setTitle(screenTitle + " | (Disconnected)");
+        } else {
+            JOptionPane.showMessageDialog(this, "You are already disconnected from the server.", "Warning",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_disconnectActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
@@ -186,15 +187,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         }
 
     }//GEN-LAST:event_placeOrderBtnActionPerformed
-
-    private void placeOrderBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtn1ActionPerformed
-        if (clientComm.isConnected()) {
-            TestPlaceOrderForm form = new TestPlaceOrderForm(this, true, clientComm);
-            form.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "You must be connected to a server to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
-        }
-    }//GEN-LAST:event_placeOrderBtn1ActionPerformed
 
     @Override
     public void start(ClientComm clientComm) {
@@ -242,20 +234,23 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private javax.swing.JScrollPane myOrdersScrollPane;
     private javax.swing.JTable myOrdersTable;
     private javax.swing.JButton placeOrderBtn;
-    private javax.swing.JButton placeOrderBtn1;
     private javax.swing.JScrollPane unfulfilledOrdersScrollPane;
     private javax.swing.JTable unfulfilledOrdersTable;
     // End of variables declaration//GEN-END:variables
 
     private void browseOrders() {
-        Timer timer = new Timer(500, new ActionListener() {
+        System.out.println("ClientUI >> Browse orders... ");
+        timer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("ClientUI >> Checking for new messages... ");
                 while (clientComm.hasNextMessage()) {
+                    System.out.println("ClientUI >> Processing new messages... ");
                     ClientSideMessage message = clientComm.getNextMessage();
-
+                    System.out.println("ClientUI >> Message received " + message);
                     if (message == null) {
-                        JOptionPane.showMessageDialog(null, "You have been disconnected from the server.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "You have been disconnected from the server.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                     } else if (message.getType() == ClientSideMessage.Type.ORDER) {
                         int index = -1;
 
@@ -279,7 +274,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
                         }
                     }
                 }
-
                 unfulfilledOrdersTable.setModel(new OrderTableModel(orders));
                 myOrdersTable.setModel(new OrderTableModel(history));
             }
