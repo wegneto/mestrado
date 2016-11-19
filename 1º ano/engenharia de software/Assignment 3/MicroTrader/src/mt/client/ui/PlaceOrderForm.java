@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mt.client;
+package mt.client.ui;
 
 import javax.swing.JOptionPane;
 import mt.Order;

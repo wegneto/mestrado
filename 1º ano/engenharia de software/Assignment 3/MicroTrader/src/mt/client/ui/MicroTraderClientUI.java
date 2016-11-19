@@ -1,4 +1,4 @@
-package mt.client;
+package mt.client.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.Order;
+import mt.client.MicroTraderClient;
 import mt.comm.ClientComm;
 import mt.comm.ClientSideMessage;
 

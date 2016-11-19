@@ -1,4 +1,4 @@
-package mt.client;
+package mt.client.ui;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
