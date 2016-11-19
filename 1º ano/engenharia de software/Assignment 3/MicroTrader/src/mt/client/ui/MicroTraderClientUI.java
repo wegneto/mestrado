@@ -18,17 +18,16 @@ import mt.comm.ClientSideMessage;
  */
 public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTraderClient {
 
-    private static ClientComm clientComm;
+    private ClientComm clientComm;
 
-    private static List<Order> orders = new ArrayList<>();
-    private static List<Order> history = new ArrayList<>();
-
-    private static String nickname;
+    private List<Order> orders = new ArrayList<>();
+    
+    private List<Order> history = new ArrayList<>();
 
     private Timer timer;
 
     private final String screenTitle = "Micro Trader";
-
+    
     /**
      * Creates new form MicroTraderClientUI
      */
@@ -152,8 +151,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
             ConnectForm form = new ConnectForm(this, true, clientComm);
             form.setVisible(true);
             if (clientComm.isConnected()) {
-                nickname = form.getNickname();
-                setTitle(screenTitle + " | Connected user: " + nickname);
+                setTitle(screenTitle + " | Connected user: " + Session.loggedUser);
                 browseOrders();
             }
         } else {
@@ -181,7 +179,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
     private void placeOrderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtnActionPerformed
         if (clientComm.isConnected()) {
-            PlaceOrderForm form = new PlaceOrderForm(this, true, clientComm, nickname);
+            PlaceOrderForm form = new PlaceOrderForm(this, true, clientComm, Session.loggedUser);
             form.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "You must be connected to a server to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -214,12 +212,12 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         }
         //</editor-fold>
 
-        MicroTraderClientUI.clientComm = clientComm;
-
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MicroTraderClientUI().setVisible(true);
+                MicroTraderClientUI client = new MicroTraderClientUI();
+                client.clientComm = clientComm;
+                client.setVisible(true);
             }
         });
     }
@@ -244,7 +242,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         timer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("ClientUI >> Checking for new messages... ");
                 while (clientComm.hasNextMessage()) {
                     System.out.println("ClientUI >> Processing new messages... ");
                     ClientSideMessage message = clientComm.getNextMessage();
@@ -257,19 +254,23 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
                         for (Order order : orders) {
                             if (order.getServerOrderID() == message.getOrder().getServerOrderID()) {
+                                System.out.println("ClientUI >> Order found:" + order);
                                 index = orders.indexOf(order);
                             }
                         }
 
                         if (index != -1) {
                             if (message.getOrder().getNumberOfUnits() == 0) {
+                                System.out.println("ClientUI >> Order fullfiled:" + message.getOrder());
                                 orders.remove(index);
                             } else {
+                                System.out.println("ClientUI >> Order updated:" + message.getOrder());
                                 orders.get(index).setNumberOfUnits(message.getOrder().getNumberOfUnits());
                             }
-                        } else {
+                        } else if (message.getOrder().getNumberOfUnits() != 0) {
+                            System.out.println("ClientUI >> Order added:" + message.getOrder());
                             orders.add(message.getOrder());
-                            if (message.getOrder().getNickname().equalsIgnoreCase(nickname)) {
+                            if (message.getOrder().getNickname().equalsIgnoreCase(Session.loggedUser)) {
                                 history.add(message.getOrder());
                             }
                         }
@@ -281,4 +282,5 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         });
         timer.start();
     }
+    
 }

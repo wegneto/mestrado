@@ -242,8 +242,6 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 order = Order.createSellOrder(nickname, stock, numberOfUnits, pricePerUnit);
             }
 
-            System.out.println("->" + order);
-
             clientComm.sendOrder(order);
             this.setVisible(false);
         } else {

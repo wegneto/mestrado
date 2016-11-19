@@ -141,6 +141,11 @@ public class ClientCommSocket {
 	public void sendOrder(Order order) {
 		try {
 			ServerSideMessage message = CommUtils.createOrderMessage(nickname, order);
+			
+			//Reset output stream due to socket cache
+			out.reset();
+			
+			// Sending the message to the server.
 			out.writeObject(message);
 			System.out.println("ClientComm >> Sending " + message);
 		} catch (IOException e) {

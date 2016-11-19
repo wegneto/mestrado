@@ -135,6 +135,9 @@ public class ServerCommSocket extends Thread {
 				// Creating a client message based on an order.
 				ClientSideMessage message = CommUtils.createOrderMessage(order);
 
+				//Reset output stream due to socket cache
+				out.reset();
+				
 				// Sending the message to the client.
 				out.writeObject(message);
 				System.out.println("ServerComm >> Sending " + message);
