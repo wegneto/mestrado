@@ -22,7 +22,7 @@ public class ClientCommDummy implements ClientComm {
     }
     
     private void createDummyData() {
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 6; i++) {
             if (i % 2 == 0) {
                 this.sendOrder(Order.createBuyOrder("user " + i, "stock " + i, i, i));
             } else {

@@ -7,8 +7,8 @@ package mt.client.controller;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import mt.Order;
 import mt.client.ui.Session;
-import mt.comm.ClientComm;
 
 /**
  *
@@ -16,21 +16,24 @@ import mt.comm.ClientComm;
  */
 public class Controller {
     
-    private ClientComm clientComm;
-    
-    public Controller (ClientComm clientComm) {
-        this.clientComm = clientComm;
-    }
-    
     public void connect(String host, String nickname) throws UnknownHostException, IOException{
         try {
-            clientComm.connect(host, nickname);
+            Session.clientComm.connect(host, nickname);
             Session.loggedUser = nickname;
         } catch (UnknownHostException uhe) {
             throw new IOException(String.format("Host '%s' not found", host));
         } catch (IOException ex) {
             throw new IOException(String.format("Could not connect to the host %s: %s", host, ex.getMessage()));
         }
+    }
+
+    public void sendOrder(Order order) throws Exception {
+        if (Session.clientComm.isConnected()) {
+            Session.clientComm.sendOrder(order);
+        } else {
+            throw new Exception("You're not connected to any server.");
+        }
+        
     }
     
 }

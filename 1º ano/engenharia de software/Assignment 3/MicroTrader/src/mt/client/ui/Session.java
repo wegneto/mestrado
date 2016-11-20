@@ -5,6 +5,8 @@
  */
 package mt.client.ui;
 
+import mt.comm.ClientComm;
+
 /**
  *
  * @author wegneto
@@ -12,5 +14,7 @@ package mt.client.ui;
 public class Session {
     
     public static String loggedUser = "";
+    
+    public static ClientComm clientComm = null;
     
 }

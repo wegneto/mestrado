@@ -11,15 +11,12 @@ import mt.comm.ClientComm;
  */
 public class ConnectForm extends javax.swing.JDialog {
 
-    private ClientComm clientComm;
-
     /**
      * Creates new form ConnectDialog
      */
-    public ConnectForm(java.awt.Frame parent, boolean modal, ClientComm clientComm) {
+    public ConnectForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        this.clientComm = clientComm;
     }
 
     /**
@@ -118,12 +115,12 @@ public class ConnectForm extends javax.swing.JDialog {
         if (nickname.isEmpty()) {
             errorMessage = "Nickname must be provided.";
         }
-
+        
         if (!errorMessage.isEmpty()) {
             JOptionPane.showMessageDialog(this, errorMessage, "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
             try {
-                new Controller(clientComm).connect(host, nickname);
+                new Controller().connect(host, nickname);
                 setVisible(false);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

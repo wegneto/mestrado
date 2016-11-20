@@ -7,7 +7,7 @@ package mt.client.ui;
 
 import javax.swing.JOptionPane;
 import mt.Order;
-import mt.comm.ClientComm;
+import mt.client.controller.Controller;
 
 /**
  *
@@ -15,17 +15,11 @@ import mt.comm.ClientComm;
  */
 public class PlaceOrderForm extends javax.swing.JDialog {
 
-    private final ClientComm clientComm;
-    
-    private final String nickname;
-
     /**
      * Creates new form PlaceOrderForm
      */
-    public PlaceOrderForm(java.awt.Frame parent, boolean modal, ClientComm clientComm, String nickname) {
+    public PlaceOrderForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.clientComm = clientComm;
-        this.nickname = nickname;
         initComponents();
     }
 
@@ -77,7 +71,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
 
         numberOfUnitsTxt.setColumns(5);
 
-        jLabel1.setText(nickname);
+        jLabel1.setText(Session.loggedUser);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -185,68 +179,65 @@ public class PlaceOrderForm extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelBtnActionPerformed
 
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
-        if (clientComm.isConnected()) {
-            String message = "";
+        String message = "";
+        String stock = stockTxt.getText().trim();
+        long numberOfUnits = 0;
+        double pricePerUnit = 0;
 
-            if (stockTxt.getText().isEmpty()) {
-                message = (message.isEmpty() ? "" : message + "\n") + "Stock must be provided.";
-            }
-
-            if (numberOfUnitsTxt.getText().isEmpty()) {
-                message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be provided.";
-            } else {
-                try {
-                    long numberOfUnits = Long.valueOf(numberOfUnitsTxt.getText().trim());
-                    if (numberOfUnits <= 0) {
-                        message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be greater than 0.";
-                    } else if (numberOfUnits > Integer.MAX_VALUE) {
-                        message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be less than " + Integer.MAX_VALUE + ".";
-                    }
-                } catch (NumberFormatException e) {
-                    message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be a integer";
-                }
-            }
-
-            if (pricePerUnitTxt.getText().isEmpty()) {
-                message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be provided.";
-            } else {
-                try {
-                    double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText().trim());
-                    if (pricePerUnit <= 0) {
-                        message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be greater than 0.";
-                    } else if (pricePerUnit > Double.MAX_VALUE) {
-                        message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be less than " + Integer.MAX_VALUE + ".";
-                    }
-                } catch (NumberFormatException e) {
-                    message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be an number";
-                }
-            }
-
-            if ((!buyRdBtn.isSelected() && (!sellRdBtn.isSelected()))) {
-                message = (message.isEmpty() ? "" : message + "\n") + "Operation must be provided.";
-            }
-
-            if (!message.isEmpty()) {
-                JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            Order order = null;
-            String stock = stockTxt.getText();
-            int numberOfUnits = Integer.valueOf(numberOfUnitsTxt.getText().trim());
-            double pricePerUnit = Double.valueOf(pricePerUnitTxt.getText().trim());
-
-            if (buyRdBtn.isSelected()) {
-                order = Order.createBuyOrder(nickname, stock, numberOfUnits, pricePerUnit);
-            } else if (sellRdBtn.isSelected()) {
-                order = Order.createSellOrder(nickname, stock, numberOfUnits, pricePerUnit);
-            }
-
-            clientComm.sendOrder(order);
-            this.setVisible(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "You're not connected to any server.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (stock.isEmpty()) {
+            message = (message.isEmpty() ? "" : message + "\n") + "Stock must be provided.";
         }
+
+        if (numberOfUnitsTxt.getText().isEmpty()) {
+            message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be provided.";
+        } else {
+            try {
+                numberOfUnits = Long.valueOf(numberOfUnitsTxt.getText().trim());
+                if (numberOfUnits <= 0) {
+                    message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be greater than 0.";
+                } else if (numberOfUnits > Integer.MAX_VALUE) {
+                    message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be less than " + Integer.MAX_VALUE + ".";
+                }
+            } catch (NumberFormatException e) {
+                message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be a integer";
+            }
+        }
+
+        if (pricePerUnitTxt.getText().isEmpty()) {
+            message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be provided.";
+        } else {
+            try {
+                pricePerUnit = Double.valueOf(pricePerUnitTxt.getText().trim());
+                if (pricePerUnit <= 0) {
+                    message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be greater than 0.";
+                } else if (pricePerUnit > Double.MAX_VALUE) {
+                    message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be less than " + Integer.MAX_VALUE + ".";
+                }
+            } catch (NumberFormatException e) {
+                message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be an number";
+            }
+        }
+
+        if ((!buyRdBtn.isSelected() && (!sellRdBtn.isSelected()))) {
+            message = (message.isEmpty() ? "" : message + "\n") + "Operation must be provided.";
+        }
+
+        if (!message.isEmpty()) {
+            JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            try {
+                if (buyRdBtn.isSelected()) {
+                    new Controller().sendOrder(Order.createBuyOrder(Session.loggedUser, stock, (int) numberOfUnits, pricePerUnit));
+                } else if (sellRdBtn.isSelected()) {
+                    new Controller().sendOrder(Order.createSellOrder(Session.loggedUser, stock, (int) numberOfUnits, pricePerUnit));
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            this.setVisible(false);
+        }
+
     }//GEN-LAST:event_okBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
