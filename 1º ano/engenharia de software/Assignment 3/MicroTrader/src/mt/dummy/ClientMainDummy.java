@@ -8,8 +8,8 @@ import mt.comm.impl.ClientCommImpl;
 public class ClientMainDummy {
 
     public static void main(String[] args) {
-        ClientComm clientComm = new ClientCommImpl();
-        //ClientComm clientComm = new ClientCommDummy();
+        //ClientComm clientComm = new ClientCommImpl();
+        ClientComm clientComm = new ClientCommDummy();
         MicroTraderClient client = new MicroTraderClientUI();
         client.start(clientComm);
     }

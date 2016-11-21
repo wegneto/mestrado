@@ -2,25 +2,18 @@ package mt.client.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
-import mt.Order;
 import mt.client.MicroTraderClient;
+import mt.client.controller.Controller;
 import mt.comm.ClientComm;
-import mt.comm.ClientSideMessage;
 
 /**
  *
  * @author wegneto
  */
 public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTraderClient {
-
-    private List<Order> orders = new ArrayList<>();
-    
-    private List<Order> history = new ArrayList<>();
 
     private Timer timer;
 
@@ -243,42 +236,14 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         timer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                while (Session.clientComm.hasNextMessage()) {
-                    System.out.println("ClientUI >> Processing new messages... ");
-                    ClientSideMessage message = Session.clientComm.getNextMessage();
-                    System.out.println("ClientUI >> Message received " + message);
-                    if (message == null) {
-                        JOptionPane.showMessageDialog(null, "You have been disconnected from the server.", "Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    } else if (message.getType() == ClientSideMessage.Type.ORDER) {
-                        int index = -1;
-
-                        for (Order order : orders) {
-                            if (order.getServerOrderID() == message.getOrder().getServerOrderID()) {
-                                System.out.println("ClientUI >> Order found:" + order);
-                                index = orders.indexOf(order);
-                            }
-                        }
-
-                        if (index != -1) {
-                            if (message.getOrder().getNumberOfUnits() == 0) {
-                                System.out.println("ClientUI >> Order fullfiled:" + message.getOrder());
-                                orders.remove(index);
-                            } else {
-                                System.out.println("ClientUI >> Order updated:" + message.getOrder());
-                                orders.get(index).setNumberOfUnits(message.getOrder().getNumberOfUnits());
-                            }
-                        } else if (message.getOrder().getNumberOfUnits() != 0) {
-                            System.out.println("ClientUI >> Order added:" + message.getOrder());
-                            orders.add(message.getOrder());
-                            if (message.getOrder().getNickname().equalsIgnoreCase(Session.loggedUser)) {
-                                history.add(message.getOrder());
-                            }
-                        }
-                    }
+                try {
+                    new Controller().browseOrders();
+                    unfulfilledOrdersTable.setModel(new OrderTableModel(Session.orders));
+                    myOrdersTable.setModel(new OrderTableModel(Session.history));
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 }
-                unfulfilledOrdersTable.setModel(new OrderTableModel(orders));
-                myOrdersTable.setModel(new OrderTableModel(history));
             }
         });
         timer.start();
