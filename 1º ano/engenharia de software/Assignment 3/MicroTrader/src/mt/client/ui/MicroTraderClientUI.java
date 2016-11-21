@@ -6,8 +6,8 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.client.MicroTraderClient;
-import mt.client.Session;
 import mt.client.controller.Controller;
+import mt.client.controller.Session;
 import mt.comm.ClientComm;
 
 /**
@@ -20,7 +20,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
     private final String screenTitle = "Micro Trader";
     
-    private Controller controller = new Controller();
+    private final Controller controller = new Controller();
     
     /**
      * Creates new form MicroTraderClientUI

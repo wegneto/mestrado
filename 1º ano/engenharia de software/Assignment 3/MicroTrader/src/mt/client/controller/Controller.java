@@ -8,7 +8,6 @@ package mt.client.controller;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import mt.Order;
-import mt.client.Session;
 import mt.comm.ClientSideMessage;
 
 /**
