@@ -190,7 +190,7 @@
         <Component class="javax.swing.JLabel" name="jLabel1">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Session.loggedUser" type="code"/>
+              <Connection code="controller.getLoggedUser()" type="code"/>
             </Property>
           </Properties>
         </Component>

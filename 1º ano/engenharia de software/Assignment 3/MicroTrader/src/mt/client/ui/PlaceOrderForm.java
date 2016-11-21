@@ -14,6 +14,8 @@ import mt.client.controller.Controller;
  * @author wegneto
  */
 public class PlaceOrderForm extends javax.swing.JDialog {
+    
+    private Controller controller = new Controller();
 
     /**
      * Creates new form PlaceOrderForm
@@ -71,7 +73,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
 
         numberOfUnitsTxt.setColumns(5);
 
-        jLabel1.setText(Session.loggedUser);
+        jLabel1.setText(controller.getLoggedUser());
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -227,9 +229,9 @@ public class PlaceOrderForm extends javax.swing.JDialog {
         } else {
             try {
                 if (buyRdBtn.isSelected()) {
-                    new Controller().sendOrder(Order.createBuyOrder(Session.loggedUser, stock, (int) numberOfUnits, pricePerUnit));
+                    controller.sendOrder(Order.createBuyOrder(controller.getLoggedUser(), stock, (int) numberOfUnits, pricePerUnit));
                 } else if (sellRdBtn.isSelected()) {
-                    new Controller().sendOrder(Order.createSellOrder(Session.loggedUser, stock, (int) numberOfUnits, pricePerUnit));
+                    controller.sendOrder(Order.createSellOrder(controller.getLoggedUser(), stock, (int) numberOfUnits, pricePerUnit));
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

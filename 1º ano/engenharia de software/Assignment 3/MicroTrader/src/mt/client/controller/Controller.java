@@ -7,9 +7,8 @@ package mt.client.controller;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import mt.Order;
-import mt.client.ui.Session;
+import mt.client.Session;
 import mt.comm.ClientSideMessage;
 
 /**
@@ -22,13 +21,24 @@ public class Controller {
         try {
             Session.clientComm.connect(host, nickname);
             Session.loggedUser = nickname;
-            Session.orders = new ArrayList<>();
-            Session.history = new ArrayList<>();
         } catch (UnknownHostException uhe) {
             throw new IOException(String.format("Host '%s' not found", host));
         } catch (IOException ex) {
             throw new IOException(String.format("Could not connect to the host %s: %s", host, ex.getMessage()));
         }
+    }
+
+    public boolean isConnected() {
+        return !Session.loggedUser.isEmpty();
+    }
+
+    public void disconnect() {
+        Session.loggedUser = "";
+        Session.clientComm.disconnect();
+    }
+    
+    public String getLoggedUser() {
+        return Session.loggedUser;
     }
 
     public void sendOrder(Order order) throws Exception {

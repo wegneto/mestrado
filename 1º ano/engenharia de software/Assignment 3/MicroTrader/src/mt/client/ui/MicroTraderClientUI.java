@@ -6,6 +6,7 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.client.MicroTraderClient;
+import mt.client.Session;
 import mt.client.controller.Controller;
 import mt.comm.ClientComm;
 
@@ -18,6 +19,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     private Timer timer;
 
     private final String screenTitle = "Micro Trader";
+    
+    private Controller controller = new Controller();
     
     /**
      * Creates new form MicroTraderClientUI
@@ -138,11 +141,11 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
-        if (!Session.clientComm.isConnected()) {
+        if (!controller.isConnected()) {
             ConnectForm form = new ConnectForm(this, true);
             form.setVisible(true);
-            if (Session.clientComm.isConnected()) {
-                setTitle(screenTitle + " | Connected user: " + Session.loggedUser);
+            if (controller.isConnected()) {
+                setTitle(screenTitle + " | Connected user: " + controller.getLoggedUser());
                 browseOrders();
             }
         } else {
@@ -152,8 +155,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     }//GEN-LAST:event_connectActionPerformed
 
     private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
-        if (Session.clientComm.isConnected()) {
-            Session.clientComm.disconnect();
+        if (controller.isConnected()) {
+            controller.disconnect();
             timer.stop();
             unfulfilledOrdersTable.setModel(new DefaultTableModel());
             myOrdersTable.setModel(new DefaultTableModel());
@@ -165,14 +168,14 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     }//GEN-LAST:event_disconnectActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
-        if (Session.clientComm.isConnected()) {
-            Session.clientComm.disconnect();
+        if (controller.isConnected()) {
+            controller.disconnect();
         }
         System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
 
     private void placeOrderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtnActionPerformed
-        if (Session.clientComm.isConnected()) {
+        if (controller.isConnected()) {
             PlaceOrderForm form = new PlaceOrderForm(this, true);
             form.setVisible(true);
         } else {
