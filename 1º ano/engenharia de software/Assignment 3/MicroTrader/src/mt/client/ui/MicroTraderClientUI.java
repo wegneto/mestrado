@@ -2,19 +2,19 @@ package mt.client.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
-import mt.client.MicroTraderClient;
 import mt.client.controller.Controller;
 import mt.client.controller.Session;
-import mt.comm.ClientComm;
 
 /**
  *
  * @author wegneto
  */
-public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTraderClient {
+public class MicroTraderClientUI extends javax.swing.JFrame {
 
     private Timer timer;
 
@@ -22,13 +22,12 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
     
     private final Controller controller = new Controller();
     
-    /**
-     * Creates new form MicroTraderClientUI
-     */
+    public boolean teste = false;
+    
     public MicroTraderClientUI() {
         initComponents();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      */
@@ -52,6 +51,11 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(screenTitle + " | (Disconnected)");
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                MicroTraderClientUI.this.windowClosing(evt);
+            }
+        });
 
         placeOrderBtn.setText("Place Order");
         placeOrderBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -171,7 +175,12 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
         if (controller.isConnected()) {
             controller.disconnect();
         }
-        System.exit(0);
+        
+        try {
+            notifyObject(this);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MicroTraderClientUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_exitActionPerformed
 
     private void placeOrderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtnActionPerformed
@@ -184,40 +193,17 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
 
     }//GEN-LAST:event_placeOrderBtnActionPerformed
 
-    @Override
-    public void start(ClientComm clientComm) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MicroTraderClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MicroTraderClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MicroTraderClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MicroTraderClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    private void windowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_windowClosing
+        if (controller.isConnected()) {
+            controller.disconnect();
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                MicroTraderClientUI client = new MicroTraderClientUI();
-                Session.clientComm = clientComm;
-                client.setVisible(true);
-            }
-        });
-    }
+        
+        try {
+            notifyObject(this);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MicroTraderClientUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_windowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem connect;
@@ -250,6 +236,13 @@ public class MicroTraderClientUI extends javax.swing.JFrame implements MicroTrad
             }
         });
         timer.start();
+    }
+    
+    public void notifyObject(MicroTraderClientUI object) throws InterruptedException {
+        this.setVisible(false);
+        synchronized(object) {
+            object.notify();
+        }
     }
     
 }
