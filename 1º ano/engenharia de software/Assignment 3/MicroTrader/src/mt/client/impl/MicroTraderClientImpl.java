@@ -51,7 +51,7 @@ public class MicroTraderClientImpl implements MicroTraderClient {
             Logger.getLogger(MicroTraderClientImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        System.out.println("That's all folks...");
+        Logger.getLogger(MicroTraderClientImpl.class.getName()).log(Level.INFO, "That's all folks...");
     }
     
     public void waitObject(MicroTraderClientUI object) throws InterruptedException {
@@ -65,7 +65,7 @@ public class MicroTraderClientImpl implements MicroTraderClient {
         ClientComm clientComm = new ClientCommDummy();
         MicroTraderClient client = new MicroTraderClientImpl();
         client.start(clientComm);
-        System.out.println("This is the end...");
+        Logger.getLogger(MicroTraderClientImpl.class.getName()).log(Level.INFO, "This is the end...");
     }
 
 }
