@@ -41,17 +41,17 @@ public class MicroTraderClientImpl implements MicroTraderClient {
         }
         //</editor-fold>
 
-        MicroTraderClientUI client = new MicroTraderClientUI();
+        MicroTraderClientUI ui = new MicroTraderClientUI();
         Session.clientComm = clientComm;
-        client.setVisible(true);
+        ui.setVisible(true);
         
         try {
-            this.waitObject(client);
+            this.waitObject(ui);
         } catch (InterruptedException ex) {
             Logger.getLogger(MicroTraderClientImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        System.out.println("Thats all folks...");
+        System.out.println("That's all folks...");
     }
     
     public void waitObject(MicroTraderClientUI object) throws InterruptedException {
@@ -61,12 +61,11 @@ public class MicroTraderClientImpl implements MicroTraderClient {
     }
 
     public static void main(String args[]) {
-        ClientComm clientComm = new ClientCommImpl();
-        //ClientComm clientComm = new ClientCommDummy();
+        //ClientComm clientComm = new ClientCommImpl();
+        ClientComm clientComm = new ClientCommDummy();
         MicroTraderClient client = new MicroTraderClientImpl();
         client.start(clientComm);
         System.out.println("This is the end...");
-        System.exit(0);
     }
 
 }

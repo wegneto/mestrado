@@ -176,6 +176,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
             controller.disconnect();
         }
         
+        this.dispose();
+        
         try {
             notifyObject(this);
         } catch (InterruptedException ex) {
@@ -197,7 +199,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
         if (controller.isConnected()) {
             controller.disconnect();
         }
-        
+
         try {
             notifyObject(this);
         } catch (InterruptedException ex) {
@@ -239,7 +241,6 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
     }
     
     public void notifyObject(MicroTraderClientUI object) throws InterruptedException {
-        this.setVisible(false);
         synchronized(object) {
             object.notify();
         }
