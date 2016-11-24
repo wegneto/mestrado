@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mt.client.ui;
 
 import javax.swing.JOptionPane;
 import mt.Order;
 import mt.client.controller.Controller;
 
-/**
- *
- * @author wegneto
- */
 public class PlaceOrderForm extends javax.swing.JDialog {
     
     private Controller controller = new Controller();
@@ -201,7 +192,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                     message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be less than " + Integer.MAX_VALUE + ".";
                 }
             } catch (NumberFormatException e) {
-                message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be a integer";
+                message = (message.isEmpty() ? "" : message + "\n") + "Number of units must be an integer";
             }
         }
 
@@ -216,7 +207,7 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                     message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be less than " + Integer.MAX_VALUE + ".";
                 }
             } catch (NumberFormatException e) {
-                message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be an number";
+                message = (message.isEmpty() ? "" : message + "\n") + "Price per unit must be a number";
             }
         }
 
