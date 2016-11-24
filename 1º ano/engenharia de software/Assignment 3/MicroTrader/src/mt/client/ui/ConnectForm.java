@@ -36,6 +36,7 @@ public class ConnectForm extends javax.swing.JDialog {
         cancelBtn = new javax.swing.JButton();
 
         setTitle("Connect");
+        setLocationByPlatform(true);
         setResizable(false);
 
         hostLabel.setText("Host:");
@@ -100,7 +101,7 @@ public class ConnectForm extends javax.swing.JDialog {
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
-        pack();
+        setBounds(0, 0, 233, 128);
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectBtnActionPerformed

@@ -4,7 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import mt.client.MicroTraderClient;
-import mt.client.controller.Session;
+import mt.client.Session;
 import mt.client.ui.MicroTraderClientUI;
 import mt.comm.ClientComm;
 import mt.comm.impl.ClientCommImpl;

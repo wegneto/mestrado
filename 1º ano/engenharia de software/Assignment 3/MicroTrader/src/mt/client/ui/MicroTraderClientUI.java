@@ -8,12 +8,8 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.client.controller.Controller;
-import mt.client.controller.Session;
+import mt.client.Session;
 
-/**
- *
- * @author wegneto
- */
 public class MicroTraderClientUI extends javax.swing.JFrame {
 
     private Timer timer;
@@ -48,7 +44,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
         jSeparator = new javax.swing.JPopupMenu.Separator();
         exit = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(screenTitle + " | (Disconnected)");
         setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -128,25 +124,26 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(placeOrderBtn))
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE))
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 634, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(8, Short.MAX_VALUE)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(placeOrderBtn)
                 .addGap(6, 6, 6))
         );
 
-        setBounds(0, 0, 487, 383);
+        setBounds(0, 0, 640, 502);
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
         if (!controller.isConnected()) {
             ConnectForm form = new ConnectForm(this, true);
+            form.setLocationRelativeTo(this);
             form.setVisible(true);
             if (controller.isConnected()) {
                 setTitle(screenTitle + " | Connected user: " + controller.getLoggedUser());
@@ -188,6 +185,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
     private void placeOrderBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placeOrderBtnActionPerformed
         if (controller.isConnected()) {
             PlaceOrderForm form = new PlaceOrderForm(this, true);
+            form.setLocationRelativeTo(this);
             form.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "You must be connected to a server to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -223,7 +221,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void browseOrders() {
-        System.out.println("ClientUI >> Browse orders... ");
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Browse orders.");
         timer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
