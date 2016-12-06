@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<sip-app>
+	<app-name>redirect</app-name>
+	<display-name>SIP Servlet Tutorial</display-name>
+	<description>SIP Servlet Tutorial</description>
+
+	<servlet-selection>
+		<main-servlet>
+			redirect
+		</main-servlet>
+	</servlet-selection>
+
+	<servlet>
+		<servlet-name>redirect</servlet-name>
+		<display-name>redirect</display-name>
+		<description>SIP Servlet Tutorial servlet</description>
+		<servlet-class>
+			org.mobicents.servlet.sip.example.Redirect
+		</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+</sip-app>
+
