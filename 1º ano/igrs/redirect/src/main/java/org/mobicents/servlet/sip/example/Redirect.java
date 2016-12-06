@@ -15,10 +15,8 @@ import javax.servlet.ServletException;
  */
 public class Redirect extends SipServlet {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	static private Map<String, String> Binding;
 
 	public Redirect() {
@@ -38,9 +36,17 @@ public class Redirect extends SipServlet {
 		SipServletResponse response = null;
 
 		if (aor.contains("@acme.pt")) {
-			Binding.put(aor, contact);
+			int expires = getSIPExpires(request.getHeader("Contact"));
+			if (expires > 0) {
+				log("REGISTER: Registando AoR: " + aor);
+				Binding.put(aor, contact);	
+			} else {
+				log("REGISTER: Deregistando AoR: " + aor);
+				Binding.remove(aor);
+			}
 			response = request.createResponse(200);
 		} else {
+			log("REGISTER: AoR " + aor + " sem permissão para se registar ao servidor.");
 			response = request.createResponse(403);
 		}
 
@@ -54,6 +60,29 @@ public class Redirect extends SipServlet {
 			System.out.println(pairs.getKey() + " = " + pairs.getValue());
 		}
 		log("*** REGISTER:***");
+	}
+	
+	protected void doMessage(SipServletRequest request) throws ServletException, IOException {
+		String aor = getSIPuri(request.getHeader("From"));
+		SipServletResponse response = null;
+
+		if (aor.contains("@acme.pt") && Binding.containsKey(aor)) {
+			if (request.getContentLength() > 5) {
+				String message = request.getContent().toString();
+				if (message.indexOf("desativar") != -1) {
+					log("MESSAGE: Desativando sala");
+				} else {
+					log("MESSAGE: Ativando sala");
+				}
+			}
+			
+			response = request.createResponse(200);
+		} else {
+			log("MESSAGE: Usuário " + aor + " não tem permissão para enviar mensagens.");
+			response = request.createResponse(401);
+		}
+		
+		response.send();
 	}
 
 	/**
@@ -130,8 +159,10 @@ public class Redirect extends SipServlet {
 		String f = uri.substring(uri.indexOf("<") + 1, uri.indexOf(">"));
 		return f;
 	}
-
-	protected void doMessage(SipServletRequest request) throws ServletException, IOException {
-
+	
+	protected int getSIPExpires(String uri) {
+		String expires = uri.substring(uri.indexOf("expires")+8);
+		return Integer.valueOf(expires);
 	}
+
 }
