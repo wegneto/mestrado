@@ -4,6 +4,8 @@
 package org.mobicents.servlet.sip.example;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.IOException;
 
 import javax.servlet.sip.SipServlet;
@@ -18,10 +20,13 @@ public class Redirect extends SipServlet {
 	private static final long serialVersionUID = 1L;
 
 	static private Map<String, String> Binding;
+	
+	private static Map<String, String> salasAtivas;
 
 	public Redirect() {
 		super();
 		Binding = new HashMap<String, String>();
+		salasAtivas = new HashMap<String, String>();
 	}
 
 	/**
@@ -39,7 +44,7 @@ public class Redirect extends SipServlet {
 			int expires = getSIPExpires(request.getHeader("Contact"));
 			if (expires > 0) {
 				log("REGISTER: Registando AoR: " + aor);
-				Binding.put(aor, contact);	
+				Binding.put(aor, contact);
 			} else {
 				log("REGISTER: Deregistando AoR: " + aor);
 				Binding.remove(aor);
@@ -61,28 +66,41 @@ public class Redirect extends SipServlet {
 		}
 		log("*** REGISTER:***");
 	}
-	
-	protected void doMessage(SipServletRequest request) throws ServletException, IOException {
-		String aor = getSIPuri(request.getHeader("From"));
-		SipServletResponse response = null;
 
-		if (aor.contains("@acme.pt") && Binding.containsKey(aor)) {
-			if (request.getContentLength() > 5) {
+	protected void doMessage(SipServletRequest request) throws ServletException, IOException {
+		String aor = getSIPuri(request.getHeader("To"));
+		String from = getSIPuri(request.getHeader("From"));
+		
+		if (from.contains("@acme.pt") && Binding.containsKey(from)) {
+
+			if (aor.equals("sip:conference@acme.pt")) {
+				log("MESSAGE: Mensagem enviada para o AoR sip:conference@acme.pt");
+				
 				String message = request.getContent().toString();
-				if (message.indexOf("desativar") != -1) {
-					log("MESSAGE: Desativando sala");
+				
+				if (message.matches("^ativar [\\w]*")) {
+					String sala = message.split("\\s+")[1];
+					log("MESSAGE: Ativando sala " + sala + " para o utilizador " + from);
+					salasAtivas.put(from, sala);
+				} else if (message.matches("^desativar")) {
+					log("MESSAGE: Desativando sala para o utilizador " + from);
+					salasAtivas.remove(from);
 				} else {
-					log("MESSAGE: Ativando sala");
+					request.createResponse(400).send();
 				}
+				
+				request.createResponse(200).send();
 			}
 			
-			response = request.createResponse(200);
 		} else {
-			log("MESSAGE: Usuário " + aor + " não tem permissão para enviar mensagens.");
-			response = request.createResponse(401);
+			log("MESSAGE: Usuário " + from + " não tem permissão para enviar mensagens.");
+			request.createResponse(401).send();
 		}
-		
-		response.send();
+	}
+
+	protected void doInfo(SipServletRequest request) throws ServletException, IOException {
+		log("*** INFO ***");
+		request.createResponse(200).send();
 	}
 
 	/**
@@ -103,18 +121,20 @@ public class Redirect extends SipServlet {
 		}
 		log("*** INVITE:***");
 
+		SipServletResponse response = null;
+		
 		String aor = getSIPuri(request.getHeader("To")); // Get the To AoR
-		if (!Binding.containsKey(aor)) { // To AoR not in the database, reply
-											// 404
-			SipServletResponse response;
+		if (!Binding.containsKey(aor)) { 
+			// To AoR not in the database, reply 404
 			response = request.createResponse(404);
 		} else {
-			SipServletResponse response = request.createResponse(300);
+			response = request.createResponse(300);
 			// Get the To AoR contact from the database and add it to the
 			// response
 			response.setHeader("Contact", Binding.get(aor));
-			response.send();
 		}
+		
+		response.send();
 	}
 
 	// Two dummy functions that just do super.x
@@ -159,10 +179,14 @@ public class Redirect extends SipServlet {
 		String f = uri.substring(uri.indexOf("<") + 1, uri.indexOf(">"));
 		return f;
 	}
-	
+
 	protected int getSIPExpires(String uri) {
-		String expires = uri.substring(uri.indexOf("expires")+8);
+		String expires = uri.substring(uri.indexOf("expires") + 8);
 		return Integer.valueOf(expires);
 	}
+	
+	public void log(java.lang.String message){
+		Logger.getLogger(this.getClass().getSimpleName()).log(Level.INFO, message);
+    }
 
 }
