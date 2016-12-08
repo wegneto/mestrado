@@ -3,15 +3,21 @@
  */
 package org.mobicents.servlet.sip.example;
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
+import javax.servlet.ServletException;
+import javax.servlet.sip.B2buaHelper;
+import javax.servlet.sip.SipFactory;
 import javax.servlet.sip.SipServlet;
 import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
-import javax.servlet.ServletException;
+import javax.servlet.sip.SipSession;
+import javax.servlet.sip.SipURI;
 
 /**
  */
@@ -20,8 +26,10 @@ public class Redirect extends SipServlet {
 	private static final long serialVersionUID = 1L;
 
 	static private Map<String, String> Binding;
-	
+
 	private static Map<String, String> salasAtivas;
+
+	private static Logger logger = Logger.getLogger(Redirect.class.getName());
 
 	public Redirect() {
 		super();
@@ -43,58 +51,49 @@ public class Redirect extends SipServlet {
 		if (aor.contains("@acme.pt")) {
 			int expires = getSIPExpires(request.getHeader("Contact"));
 			if (expires > 0) {
-				log("REGISTER: Registando AoR: " + aor);
+				logger.info("REGISTER: Registando AoR: " + aor);
 				Binding.put(aor, contact);
 			} else {
-				log("REGISTER: Deregistando AoR: " + aor);
+				logger.info("REGISTER: Deregistando AoR: " + aor);
 				Binding.remove(aor);
 			}
 			response = request.createResponse(200);
 		} else {
-			log("REGISTER: AoR " + aor + " sem permissão para se registar ao servidor.");
+			logger.info("REGISTER: AoR " + aor + " sem permissão para se registar ao servidor.");
 			response = request.createResponse(403);
 		}
 
 		response.send();
-
-		// Some logs to show the content of the Registrar database.
-		log("*** REGISTER:***");
-		Iterator<Map.Entry<String, String>> it = Binding.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
-			System.out.println(pairs.getKey() + " = " + pairs.getValue());
-		}
-		log("*** REGISTER:***");
 	}
 
 	protected void doMessage(SipServletRequest request) throws ServletException, IOException {
-		String aor = getSIPuri(request.getHeader("To"));
+		String to = getSIPuri(request.getHeader("To"));
 		String from = getSIPuri(request.getHeader("From"));
-		
+
 		if (from.contains("@acme.pt") && Binding.containsKey(from)) {
 
-			if (aor.equals("sip:conference@acme.pt")) {
-				log("MESSAGE: Mensagem enviada para o AoR sip:conference@acme.pt");
-				
+			if (to.equals("sip:conference@acme.pt")) {
+				logger.info("MESSAGE: Mensagem enviada para o AoR sip:conference@acme.pt");
+
 				String message = request.getContent().toString();
-				
+
 				if (message.matches("^ativar [\\w]*")) {
 					String sala = message.split("\\s+")[1];
-					log("MESSAGE: Ativando sala " + sala + " para o utilizador " + from);
+					logger.info("MESSAGE: Ativando sala " + sala + " para o utilizador " + from);
 					salasAtivas.put(from, sala);
 				} else if (message.matches("^desativar")) {
-					log("MESSAGE: Desativando sala para o utilizador " + from);
+					logger.info("MESSAGE: Desativando sala para o utilizador " + from);
 					salasAtivas.remove(from);
 				} else {
 					request.createResponse(400).send();
 				}
-				
+
 				request.createResponse(200).send();
 			}
-			
+
 		} else {
-			log("MESSAGE: Usuário " + from + " não tem permissão para enviar mensagens.");
-			request.createResponse(401).send();
+			logger.info("MESSAGE: Usuário " + from + " não tem permissão para enviar mensagens.");
+			request.createResponse(SipServletResponse.SC_NOT_FOUND).send();
 		}
 	}
 
@@ -104,52 +103,92 @@ public class Redirect extends SipServlet {
 	}
 
 	/**
-	 * Sends SIP replies to INVITE messages - 300 if registred - 404 if not
-	 * registred
 	 * 
 	 * @param request
 	 *            The SIP message received by the AS
 	 */
 	protected void doInvite(SipServletRequest request) throws ServletException, IOException {
-
-		// Some logs to show the content of the Registrar database.
-		log("*** INVITE:***");
-		Iterator<Map.Entry<String, String>> it = Binding.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
-			System.out.println(pairs.getKey() + " = " + pairs.getValue());
-		}
-		log("*** INVITE:***");
-
 		SipServletResponse response = null;
-		
-		String aor = getSIPuri(request.getHeader("To")); // Get the To AoR
-		if (!Binding.containsKey(aor)) { 
-			// To AoR not in the database, reply 404
-			response = request.createResponse(404);
+		String from = getSIPuri(request.getHeader("From")); // Get the To AoR
+
+		if (Binding.containsKey(from)) {
+
+			if (salasAtivas.containsKey(from)) {
+				// Usuário tem sala ativa
+				SipFactory sipFactory = (SipFactory) getServletContext().getAttribute(SIP_FACTORY);
+				String nomeSala = salasAtivas.get(from);
+
+				Map<String, List<String>> headers = new HashMap<String, List<String>>();
+				List<String> toHeaderSet = new ArrayList<String>();
+				toHeaderSet.add("sip:" + nomeSala + "@acme.pt");
+				headers.put("To", toHeaderSet);
+
+				B2buaHelper helper = request.getB2buaHelper();
+				SipServletRequest forkedRequest = helper.createRequest(request, true, headers);
+				SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + nomeSala + "@acme.pt:5070");
+
+				forkedRequest.setRequestURI(sipUri);
+				forkedRequest.getSession().setAttribute("originalRequest", request);
+				forkedRequest.send();
+
+			} else {
+				// Usuário não tem sala ativa = 401
+				response = request.createResponse(SipServletResponse.SC_UNAUTHORIZED);
+				response.send();
+			}
+
 		} else {
-			response = request.createResponse(300);
-			// Get the To AoR contact from the database and add it to the
-			// response
-			response.setHeader("Contact", Binding.get(aor));
+			// Usuário não registado = 404
+			response = request.createResponse(SipServletResponse.SC_NOT_FOUND);
+			response.send();
 		}
-		
-		response.send();
 	}
 
-	// Two dummy functions that just do super.x
 	/**
 	 * @param response
 	 *            The SIP message received by the AS
 	 */
 	protected void doResponse(SipServletResponse response) throws ServletException, IOException {
-		log("SimpleProxy: doResponse: invalidating session");
+		logger.info("************ DORESPONSE ***************");
 		super.doResponse(response);
 	}
 
 	protected void doBye(SipServletRequest request) throws ServletException, IOException {
-		log("SimpleProxy: doBye: invalidate session when responses is received.");
-		super.doBye(request);
+		// we send the OK directly to the first call leg
+		SipServletResponse sipServletResponse = request.createResponse(SipServletResponse.SC_OK);
+		sipServletResponse.send();
+
+		// we forward the BYE
+		SipSession session = request.getSession();
+		B2buaHelper helper = request.getB2buaHelper();
+		SipSession linkedSession = helper.getLinkedSession(session);
+		SipServletRequest forkedRequest = linkedSession.createRequest("BYE");
+		forkedRequest.send();
+
+		if (session != null && session.isValid()) {
+			session.invalidate();
+		}
+
+		return;
+	}
+
+	protected void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
+		if (response.getMethod().indexOf("INVITE") != -1) {
+			// if this is a response to an INVITE we ack it and forward the OK
+			SipServletRequest ackRequest = response.createAck();
+			ackRequest.send();
+
+			// create and sends OK for the first call leg
+			SipServletRequest originalRequest = (SipServletRequest) response.getSession()
+					.getAttribute("originalRequest");
+			SipServletResponse responseToOriginalRequest = originalRequest.createResponse(response.getStatus());
+
+			responseToOriginalRequest.setContentLength(response.getContentLength());
+			if (response.getContent() != null && response.getContentType() != null) {
+				responseToOriginalRequest.setContent(response.getContent(), response.getContentType());
+			}
+			responseToOriginalRequest.send();
+		}
 	}
 
 	/**
@@ -184,9 +223,5 @@ public class Redirect extends SipServlet {
 		String expires = uri.substring(uri.indexOf("expires") + 8);
 		return Integer.valueOf(expires);
 	}
-	
-	public void log(java.lang.String message){
-		Logger.getLogger(this.getClass().getSimpleName()).log(Level.INFO, message);
-    }
 
 }
