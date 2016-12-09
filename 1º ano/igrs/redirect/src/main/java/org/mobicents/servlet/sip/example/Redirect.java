@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+import javax.servlet.sip.Address;
 import javax.servlet.sip.B2buaHelper;
 import javax.servlet.sip.SipFactory;
 import javax.servlet.sip.SipServlet;
@@ -18,6 +19,8 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 import javax.servlet.sip.SipURI;
+
+import org.omg.CORBA.Request;
 
 /**
  */
@@ -113,11 +116,16 @@ public class Redirect extends SipServlet {
 		case 1:
 			SipFactory sipFactory = (SipFactory) getServletContext().getAttribute(SIP_FACTORY);
 
-			SipServletRequest subscribe = sipFactory.createRequest(request.getApplicationSession(), "INVITE",
-					"sip:conference@acme.pt", "sip:bob@acme.pt:5062");
+			Address serverAddress = sipFactory.createAddress("sip:bob@acme.pt:5062");
+			SipServletRequest newRequest = sipFactory.createRequest(request.getApplicationSession(), "INVITE",
+					request.getFrom(), serverAddress);
+
+			if (request.getContent() != null) {
+				newRequest.setContent(request.getContent(), request.getContentType());
+			}
+			newRequest.send();
 
 			request.createResponse(SipServletResponse.SC_OK).send();
-			subscribe.send();
 
 			break;
 
@@ -197,16 +205,14 @@ public class Redirect extends SipServlet {
 	}
 
 	protected void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
-		logger.info("============================ 1");
+		String to = getSIPuri(response.getHeader("To"));
 
-		String from = getSIPuri(response.getHeader("From"));
-
-		if (from.equals("sip:conference@acme.pt")) {
-			logger.info("============================ 2");
-			
+		if (to.equals("sip:bob@acme.pt")) {
+			SipServletRequest ackRequest = response.createAck();
+			ackRequest.setContent(response.getContent(), response.getContentType());
+			ackRequest.send();
 
 		} else if (response.getMethod().indexOf("INVITE") != -1) {
-			logger.info("============================ 3");
 			// if this is a response to an INVITE we ack it and forward the OK
 			SipServletRequest ackRequest = response.createAck();
 			ackRequest.send();
