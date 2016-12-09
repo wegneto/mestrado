@@ -49,7 +49,14 @@ public class Redirect extends SipServlet {
 		SipServletResponse response = null;
 
 		if (aor.contains("@acme.pt")) {
-			int expires = getSIPExpires(request.getHeader("Contact"));
+			int expires = 0;
+			String expStr = request.getHeader("Expires");
+			if (expStr != null) {
+				expires = Integer.parseInt(expStr);
+			} else {
+				expires = getSIPExpires(request.getHeader("Contact"));
+			}
+
 			if (expires > 0) {
 				logger.info("REGISTER: Registando AoR: " + aor);
 				Binding.put(aor, contact);
@@ -98,8 +105,27 @@ public class Redirect extends SipServlet {
 	}
 
 	protected void doInfo(SipServletRequest request) throws ServletException, IOException {
-		log("*** INFO ***");
-		request.createResponse(200).send();
+		logger.info("*** Método info ***");
+		String messageContent = new String((byte[]) request.getContent());
+		int signal = Integer.valueOf(messageContent.substring("Signal=".length(), "Signal=".length() + 1).trim());
+
+		switch (signal) {
+		case 1:
+			SipFactory sipFactory = (SipFactory) getServletContext().getAttribute(SIP_FACTORY);
+
+			SipServletRequest subscribe = sipFactory.createRequest(request.getApplicationSession(), "INVITE",
+					"sip:conference@acme.pt", "sip:bob@acme.pt:5062");
+
+			request.createResponse(SipServletResponse.SC_OK).send();
+			subscribe.send();
+
+			break;
+
+		default:
+
+			request.createResponse(SipServletResponse.SC_NOT_FOUND).send();
+			break;
+		}
 	}
 
 	/**
@@ -130,13 +156,11 @@ public class Redirect extends SipServlet {
 				forkedRequest.setRequestURI(sipUri);
 				forkedRequest.getSession().setAttribute("originalRequest", request);
 				forkedRequest.send();
-
 			} else {
 				// Usuário não tem sala ativa = 401
 				response = request.createResponse(SipServletResponse.SC_UNAUTHORIZED);
 				response.send();
 			}
-
 		} else {
 			// Usuário não registado = 404
 			response = request.createResponse(SipServletResponse.SC_NOT_FOUND);
@@ -173,7 +197,16 @@ public class Redirect extends SipServlet {
 	}
 
 	protected void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
-		if (response.getMethod().indexOf("INVITE") != -1) {
+		logger.info("============================ 1");
+
+		String from = getSIPuri(response.getHeader("From"));
+
+		if (from.equals("sip:conference@acme.pt")) {
+			logger.info("============================ 2");
+			
+
+		} else if (response.getMethod().indexOf("INVITE") != -1) {
+			logger.info("============================ 3");
 			// if this is a response to an INVITE we ack it and forward the OK
 			SipServletRequest ackRequest = response.createAck();
 			ackRequest.send();
