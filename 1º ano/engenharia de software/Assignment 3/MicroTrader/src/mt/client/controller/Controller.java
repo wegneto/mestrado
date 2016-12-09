@@ -9,32 +9,69 @@ import mt.Order;
 import mt.client.Session;
 import mt.comm.ClientSideMessage;
 
+/**
+ * Class responsible for keeping the business logic for the Micro Trader User
+ * Interface.
+ */
 public class Controller {
 
+	/**
+	 * Asks to the ClientComm to establish a connection to a MicroTrader server.
+	 * 
+	 * @param host
+	 *            Address of the server. For instance "localhost",
+	 *            "192.168.1.1", and or similar.
+	 * @param nickname
+	 *            The nickname of the user.
+	 * @throws UnknownHostException
+	 *             Thrown if the host cannot be found.
+	 * @throws IOException
+	 *             Thrown if a connection cannot be established.
+	 */
 	public void connect(String host, String nickname) throws UnknownHostException, IOException {
 		try {
 			Session.clientComm.connect(host, nickname);
 			Session.loggedUser = nickname;
 		} catch (UnknownHostException uhe) {
-			throw new IOException(String.format("Host '%s' not found", host));
+			throw new UnknownHostException(String.format("Host '%s' not found", host));
 		} catch (IOException ex) {
-			throw new IOException(String.format("Could not connect to the host %s: %s", host, ex.getMessage()));
+			throw new IOException("A connection could not be established.");
 		}
 	}
 
+	/**
+	 * Check if an user is currently connected to a host.
+	 * 
+	 * @return <b>true</b> if currently connected to a host, <b>false</b>
+	 *         otherwise.
+	 */
 	public boolean isConnected() {
 		return !Session.loggedUser.isEmpty();
 	}
 
+	/**
+	 * Send the disconnects order to the ClientComm.
+	 */
 	public void disconnect() {
 		Session.loggedUser = "";
 		Session.clientComm.disconnect();
 	}
 
+	/**
+	 * Identify the currently logged user.
+	 * 
+	 * @return the name of the logged user
+	 */
 	public String getLoggedUser() {
 		return Session.loggedUser;
 	}
 
+	/**
+	 * Asks the ClientComm interface to send an order to the server.
+	 * 
+	 * @param order
+	 *            The MicroTrader order to send.
+	 */
 	public void sendOrder(Order order) throws Exception {
 		if (Session.clientComm.isConnected()) {
 			Session.clientComm.sendOrder(order);
@@ -43,12 +80,20 @@ public class Controller {
 		}
 	}
 
+	/**
+	 * Browse the orders pending in the ClientComm interface.
+	 * 
+	 * @throws Exception
+	 *             Thrown if the user was disconnected from the server or if
+	 *             there is some error message.
+	 */
 	public void browseOrders() throws Exception {
 		while (Session.clientComm.hasNextMessage()) {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Processing new messages");
 			ClientSideMessage message = Session.clientComm.getNextMessage();
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Message received " + message);
 			if (message == null) {
+				Session.loggedUser = "";
 				throw new Exception("You have been disconnected from the server.");
 			} else if (message.getType() == ClientSideMessage.Type.ORDER) {
 				int index = -1;
@@ -62,10 +107,12 @@ public class Controller {
 
 				if (index != -1) {
 					if (message.getOrder().getNumberOfUnits() == 0) {
-						Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Order fullfiled:" + message.getOrder());
+						Logger.getLogger(this.getClass().getName()).log(Level.INFO,
+								"Order fullfiled:" + message.getOrder());
 						Session.orders.remove(index);
 					} else {
-						Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Order updated:" + message.getOrder());
+						Logger.getLogger(this.getClass().getName()).log(Level.INFO,
+								"Order updated:" + message.getOrder());
 						Session.orders.get(index).setNumberOfUnits(message.getOrder().getNumberOfUnits());
 					}
 				} else if (message.getOrder().getNumberOfUnits() != 0) {
@@ -75,6 +122,8 @@ public class Controller {
 						Session.history.add(message.getOrder());
 					}
 				}
+			} else if (message.getType() == ClientSideMessage.Type.ERROR) {
+				throw new Exception(message.getError());
 			}
 		}
 	}

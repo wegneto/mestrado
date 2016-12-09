@@ -1,25 +1,28 @@
 package mt.server.impl;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import mt.comm.impl.ServerCommImpl;
 import mt.Order;
 import mt.comm.ServerComm;
 import mt.comm.ServerSideMessage;
+import mt.comm.impl.ServerCommImpl;
 import mt.server.MicroTraderServer;
 
 public class MTServer implements MicroTraderServer {
 
 	private ServerComm serverComm;
 
+	private MTServerConsole serverConsole;
+
 	private ArrayDeque<String> connectedClients;
 
-	private HashMap<Integer, Order> buyOrders;
+	private ArrayList<Order> buyOrders;
 
-	private HashMap<Integer, Order> sellOrders;
+	private ArrayList<Order> sellOrders;
 
 	private int orderId;
 
@@ -31,15 +34,9 @@ public class MTServer implements MicroTraderServer {
 	@Override
 	public void start(ServerComm serverComm) {
 
-		connectedClients = new ArrayDeque<>();
+		initFields();
 
-		buyOrders = new HashMap<Integer, Order>();
-
-		sellOrders = new HashMap<Integer, Order>();
-
-		serverComm.start();
-
-		MTServerConsole serverConsole = new MTServerConsole(this);
+		serverConsole = new MTServerConsole(this);
 
 		// Server console to allow interaction with the server
 		serverConsole.start();
@@ -54,48 +51,39 @@ public class MTServer implements MicroTraderServer {
 
 		while (true) {
 
-			ServerSideMessage message = (ServerSideMessage) serverComm.getNextMessage();
-			/*
-			 * A blocking queue should be implemented in the serverComm side.
-			 * This method should block because it's trying to take a message
-			 * from a blocking queue.
-			 */
+			waitForMessage();
 
-			if (searchIfClientConnected(message.getSenderNickname())
-					|| message.getType().equals(ServerSideMessage.Type.CONNECTED)) {
-
-				interpretMessage(message);
-
-			} else {
-
-				serverComm.sendError(message.getSenderNickname(),
-						"You are not conneted. Your order will not be processed.");
-
-				System.out.println("The client is not connected. The order will not be processed.");
-			}
 		}
-
 	}
 
 	public void interpretMessage(ServerSideMessage message) {
 
-		String client = message.getSenderNickname();
+		String client = null;
 
-		if (message.getType().equals(ServerSideMessage.Type.CONNECTED)) {
-
-			addConnectedClient(client);
+		if (message.getSenderNickname() != null && !message.getSenderNickname().isEmpty()) {
+			client = message.getSenderNickname();
 		}
 
-		else if (message.getType().equals(ServerSideMessage.Type.DISCONNECTED)) {
+		if (message.getType() != null) {
 
-			removeConnectedClient(client);
-		}
+			if (message.getType().equals(ServerSideMessage.Type.CONNECTED)) {
 
-		else if (message.getType().equals(ServerSideMessage.Type.NEW_ORDER)) {
+				addConnectedClient(client);
+			}
 
-			Order o = message.getOrder();
+			else if (message.getType().equals(ServerSideMessage.Type.DISCONNECTED)) {
 
-			readOrder(o);
+				removeConnectedClient(client);
+			}
+
+			else if (message.getType().equals(ServerSideMessage.Type.NEW_ORDER)) {
+
+				if (message.getOrder() != null) {
+					Order o = message.getOrder();
+
+					readOrder(o);
+				}
+			}
 		}
 	}
 
@@ -155,17 +143,17 @@ public class MTServer implements MicroTraderServer {
 	 */
 	public void removeOrdersFromClient(String client) {
 
-		Iterator<Entry<Integer, Order>> itBuyOrders = buyOrders.entrySet().iterator();
+		Iterator<Order> itBuyOrders = buyOrders.iterator();
 
-		Iterator<Entry<Integer, Order>> itSellOrders = sellOrders.entrySet().iterator();
+		Iterator<Order> itSellOrders = sellOrders.iterator();
 
-		Entry<Integer, Order> entry;
+		Order order;
 
 		while (itBuyOrders.hasNext()) {
 
-			entry = (Entry) itBuyOrders.next();
+			order = itBuyOrders.next();
 
-			if (entry.getValue().getNickname().equals(client)) {
+			if (order.getNickname().equals(client)) {
 
 				itBuyOrders.remove();
 			}
@@ -173,9 +161,9 @@ public class MTServer implements MicroTraderServer {
 
 		while (itSellOrders.hasNext()) {
 
-			entry = (Entry) itSellOrders.next();
+			order = itSellOrders.next();
 
-			if (entry.getValue().getNickname().equals(client)) {
+			if (order.getNickname().equals(client)) {
 
 				itSellOrders.remove();
 
@@ -190,12 +178,12 @@ public class MTServer implements MicroTraderServer {
 	 */
 	public void updateOrdersToClient(String client) {
 
-		for (Order order : buyOrders.values()) {
+		for (Order order : buyOrders) {
 
 			serverComm.sendOrder(client, order);
 		}
 
-		for (Order order : sellOrders.values()) {
+		for (Order order : sellOrders) {
 
 			serverComm.sendOrder(client, order);
 		}
@@ -212,14 +200,14 @@ public class MTServer implements MicroTraderServer {
 		if (order.isSellOrder()) {
 
 			order.setServerOrderID(++orderId);
-			sellOrders.put(orderId, order);
+			sellOrders.add(order);
 
 		}
 
 		else if (order.isBuyOrder()) {
 
 			order.setServerOrderID(++orderId);
-			buyOrders.put(orderId, order);
+			buyOrders.add(order);
 
 		}
 
@@ -238,17 +226,28 @@ public class MTServer implements MicroTraderServer {
 	 */
 	public void checkForPairOrders(Order order) {
 
-		boolean isOrderFulfilled = false;
+		Iterator<Order> itBuyOrders = buyOrders.iterator();
+
+		Iterator<Order> itSellOrders = sellOrders.iterator();
+
+		Order buyOrder;
+
+		Order sellOrder;
 
 		if (order.isSellOrder()) {
-			Order sellOrder = order;
 
-			for (Order buyOrder : buyOrders.values()) {
+			sellOrder = order;
+
+			// for (Order buyOrder : buyOrders) {
+			while (itBuyOrders.hasNext()) {
+
+				buyOrder = itBuyOrders.next();
 
 				if (buyOrder.getStock().equals(sellOrder.getStock())
 						&& buyOrder.getPricePerUnit() >= sellOrder.getPricePerUnit()) {
 
-					// Sell order fulfilled scenario - More buy units than sell
+					// Sell order fulfilled scenario - More buy units than
+					// sell
 					// units.
 					if (sellOrder.getNumberOfUnits() - buyOrder.getNumberOfUnits() <= 0) {
 
@@ -258,45 +257,42 @@ public class MTServer implements MicroTraderServer {
 						// Update sell order's number of units to zero.
 						sellOrder.setNumberOfUnits(0);
 						sellOrder.toString();
-						// System.out.println("Sell order has been fulfilled.");
+						// System.out.println("Sell order has been
+						// fulfilled.");
 
-						// The fact that the order has 0 number of units tells
+						// The fact that the order has 0 number of units
+						// tells
 						// that she's been fulfilled.
-						// Inform connected clients that the sell order has been
+						// Inform connected clients that the sell order has
+						// been
 						// fulfilled.
 						updateAllClientsOfOrder(sellOrder);
 						System.out.println(
 								"Server >> Updated all clients of the fulfilled sell order. " + sellOrder.toString());
 
 						// Remove the order from the server.
-						sellOrders.remove(sellOrder);
+						removeOrder(sellOrder);
+
+						// Update all clients of buy order
+						updateAllClientsOfOrder(buyOrder);
+
+						System.out.println(
+								"Server >> Updated all clients of the updated buy order. " + buyOrder.toString());
 
 						// Buy order is fulfilled too.
 						if (buyOrder.getNumberOfUnits() == 0) {
-							updateAllClientsOfOrder(buyOrder);
-							System.out.println(
-									"Server >> Updated all clients of the fulfilled buy order. " + buyOrder.toString());
-							// buyOrder.toString();
-							// System.out.println("Buy order has been
-							// fulfilled");
-							buyOrders.remove(buyOrder);
-
+							removeOrder(buyOrder);
 						}
 
-						else {
-
-							updateOneClientOfOrder(buyOrder);
-							System.out.println(
-									"Server >> Updated the client of the updated buy order. " + buyOrder.toString());
-
-						}
 						return;
 
 					}
 
-					// Buy order fulfilled scenario - more units to sell than
+					// Buy order fulfilled scenario - more units to sell
+					// than
 					// buy units.
-					// We still need to check if more buy orders exist for this
+					// We still need to check if more buy orders exist for
+					// this
 					// stock in the server.
 					else if (sellOrder.getNumberOfUnits() - buyOrder.getNumberOfUnits() > 0) {
 
@@ -311,10 +307,10 @@ public class MTServer implements MicroTraderServer {
 						System.out.println(
 								"Server >> Updated all clients of the fulfilled buy order. " + buyOrder.toString());
 						// Remove buy order from server
-						buyOrders.remove(buyOrder);
+						removeOrder(buyOrder);
 
-						// Update the respective client of the order
-						updateOneClientOfOrder(sellOrder);
+						// Update all clients of the sell order
+						updateAllClientsOfOrder(sellOrder);
 						System.out.println(
 								"Server >> Updated the client of the updated sell order. " + sellOrder.toString());
 
@@ -325,14 +321,17 @@ public class MTServer implements MicroTraderServer {
 
 		else if (order.isBuyOrder()) {
 
-			Order buyOrder = order;
+			buyOrder = order;
 
-			for (Order sellOrder : sellOrders.values()) {
+			while (itSellOrders.hasNext()) {
+				// for (Order sellOrder : sellOrders) {
+				sellOrder = itSellOrders.next();
 
 				if (sellOrder.getStock().equals(buyOrder.getStock())
 						&& sellOrder.getPricePerUnit() <= buyOrder.getPricePerUnit()) {
 
-					// Buy order fulfilled scenario - More sell units than buy
+					// Buy order fulfilled scenario - More sell units than
+					// buy
 					// units.
 					if (buyOrder.getNumberOfUnits() - sellOrder.getNumberOfUnits() <= 0) {
 
@@ -344,42 +343,34 @@ public class MTServer implements MicroTraderServer {
 						buyOrder.toString();
 						System.out.println("Buy order has been fulfilled.");
 
-						// The fact that the order has 0 number of units tells
+						// The fact that the order has 0 number of units
+						// tells
 						// that she's been fulfilled.
-						// Inform connected clients that the buy order has been
+						// Inform connected clients that the buy order has
+						// been
 						// fulfilled.
 						updateAllClientsOfOrder(buyOrder);
 						System.out.println(
 								"Server >> Updated all clients of the fulfilled buy order. " + buyOrder.toString());
 
 						// Remove the order from the server.
-						buyOrders.remove(buyOrder);
+						removeOrder(buyOrder);
 
-						// Buy order is fulfilled too.
+						// Update all clients of the sell order
+						updateAllClientsOfOrder(sellOrder);
+						System.out.println("Server >> Updated all clients of the sell order. " + sellOrder.toString());
+
 						if (sellOrder.getNumberOfUnits() == 0) {
-							updateAllClientsOfOrder(sellOrder);
-							System.out.println("Server >> Updated all clients of the fulfilled sell order. "
-									+ sellOrder.toString());
-							sellOrders.remove(sellOrder);
-							sellOrder.toString();
-							// System.out.println("Sell order has been
-							// fulfilled");
 
-						}
-
-						else {
-
-							updateOneClientOfOrder(sellOrder);
-							System.out.println(
-									"Server >> Updated the client of the updated sell order. " + sellOrder.toString());
-
+							removeOrder(sellOrder);
 						}
 
 						return;
 
 					}
 
-					// Buy order fulfilled scenario - more units to sell than
+					// Buy order fulfilled scenario - more units to sell
+					// than
 					// buy units.
 					else if (buyOrder.getNumberOfUnits() - sellOrder.getNumberOfUnits() > 0) {
 
@@ -395,9 +386,10 @@ public class MTServer implements MicroTraderServer {
 								"Server >> Updated all clients of the fulfilled sell order." + sellOrder.toString());
 
 						// Remove buy order from server
-						sellOrders.remove(sellOrder);
+						removeOrder(sellOrder);
 
-						updateOneClientOfOrder(buyOrder);
+						// Update all clients of the updated buy order
+						updateAllClientsOfOrder(buyOrder);
 						System.out.println(
 								"Server >> Updated the client of the updated buy order. " + buyOrder.toString());
 
@@ -420,18 +412,70 @@ public class MTServer implements MicroTraderServer {
 		}
 	}
 
-	/**
-	 * Update only one client of his respective order, not yet fulfilled.
-	 */
+	public void waitForMessage() {
 
-	public void updateOneClientOfOrder(Order order) {
+		ServerSideMessage message = (ServerSideMessage) serverComm.getNextMessage();
+		/*
+		 * A blocking queue should be implemented in the serverComm side. This
+		 * method should block because it's trying to take a message from a
+		 * blocking queue.
+		 */
 
-		for (String s : connectedClients) {
+		if (message != null) {
 
-			if (s.equals(order.getNickname())) {
+			if (searchIfClientConnected(message.getSenderNickname())
+					|| message.getType().equals(ServerSideMessage.Type.CONNECTED)) {
 
-				serverComm.sendOrder(s, order);
-				return;
+				interpretMessage(message);
+
+			} else {
+
+				serverComm.sendError(message.getSenderNickname(),
+						"You are not conneted. Your order will not be processed.");
+
+				System.out.println("The client is not connected. The order will not be processed.");
+			}
+		}
+	}
+
+	public void initFields() {
+
+		connectedClients = new ArrayDeque<>();
+
+		buyOrders = new ArrayList<Order>();
+
+		sellOrders = new ArrayList<Order>();
+
+		serverComm.start();
+	}
+
+	private void removeOrder(Order order) {
+
+		if (order.isBuyOrder()) {
+
+			Iterator<Order> itBuyOrder = buyOrders.iterator();
+
+			loop: while (itBuyOrder.hasNext()) {
+
+				if (itBuyOrder.next().getServerOrderID() == order.getServerOrderID()) {
+
+					itBuyOrder.remove();
+					break loop;
+				}
+			}
+		}
+
+		if (!order.isBuyOrder()) {
+
+			Iterator<Order> itSellOrder = sellOrders.iterator();
+
+			loop: while (itSellOrder.hasNext()) {
+
+				if (itSellOrder.next().getServerOrderID() == order.getServerOrderID()) {
+
+					itSellOrder.remove();
+					break loop;
+				}
 			}
 		}
 	}
@@ -442,9 +486,12 @@ public class MTServer implements MicroTraderServer {
 	public void shutdown() {
 
 		System.out.println("The server is closing...");
+		serverConsole.interrupt();
 		System.exit(0);
 		System.out.println("The server is down.");
 	}
+
+	// Getters and Setters
 
 	public ServerComm getServerComm() {
 		return serverComm;
@@ -462,19 +509,19 @@ public class MTServer implements MicroTraderServer {
 		this.connectedClients = connectedClients;
 	}
 
-	public HashMap<Integer, Order> getBuyOrders() {
+	public ArrayList<Order> getBuyOrders() {
 		return buyOrders;
 	}
 
-	public void setBuyOrders(HashMap<Integer, Order> buyOrders) {
+	public void setBuyOrders(ArrayList<Order> buyOrders) {
 		this.buyOrders = buyOrders;
 	}
 
-	public HashMap<Integer, Order> getSellOrders() {
+	public ArrayList<Order> getSellOrders() {
 		return sellOrders;
 	}
 
-	public void setSellOrders(HashMap<Integer, Order> sellOrders) {
+	public void setSellOrders(ArrayList<Order> sellOrders) {
 		this.sellOrders = sellOrders;
 	}
 

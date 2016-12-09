@@ -2,7 +2,6 @@ package mt.comm.common;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 
 import mt.Order;
 import mt.comm.ClientSideMessage;
@@ -102,24 +101,13 @@ public final class CommUtils {
 	 *             In an error has occurred while closing resources.
 	 */
 	public static void releaseResources(Closeable... closables) throws IOException {
-		if (closables != null && closables.length != 0) {
+		if (closables != null) {
 			for (Closeable closeable : closables) {
 				if (closeable != null) {
 					closeable.close();
 				}
 			}
 		}
-	}
-
-	/**
-	 * This method is used to validate if a certain list of objects is empty.
-	 * 
-	 * @param list
-	 *            The list to be validated.
-	 * @return True if empty, otherwise false.
-	 */
-	public static boolean isEmpty(List<?> list) {
-		return list == null || list.size() == 0;
 	}
 
 	/**
