@@ -43,6 +43,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
         disconnect = new javax.swing.JMenuItem();
         jSeparator = new javax.swing.JPopupMenu.Separator();
         exit = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(screenTitle + " | (Disconnected)");
@@ -112,6 +114,18 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
         fileMenu.add(exit);
 
         menuBar.add(fileMenu);
+
+        jMenu2.setText("Orders");
+
+        jMenuItem2.setText("Generate");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jMenuItem2);
+
+        menuBar.add(jMenu2);
 
         setJMenuBar(menuBar);
 
@@ -205,11 +219,17 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_windowClosing
 
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem connect;
     private javax.swing.JMenuItem disconnect;
     private javax.swing.JMenuItem exit;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPopupMenu.Separator jSeparator;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JMenuBar menuBar;

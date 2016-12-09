@@ -38,8 +38,8 @@ public class PlaceOrderForm extends javax.swing.JDialog {
         numberOfUnitsTxt = new javax.swing.JTextField();
         pricePerUnitTxt = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        cancelBtn = new javax.swing.JButton();
         okBtn = new javax.swing.JButton();
+        cancelBtn1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Place Order");
@@ -121,17 +121,17 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                     .addComponent(sellRdBtn)))
         );
 
-        cancelBtn.setText("Cancel");
-        cancelBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelBtnActionPerformed(evt);
-            }
-        });
-
         okBtn.setText("Ok");
         okBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okBtnActionPerformed(evt);
+            }
+        });
+
+        cancelBtn1.setText("Cancel");
+        cancelBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelBtn1ActionPerformed(evt);
             }
         });
 
@@ -144,32 +144,33 @@ public class PlaceOrderForm extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(okBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cancelBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(92, 92, 92)))
                 .addContainerGap())
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addContainerGap(319, Short.MAX_VALUE)
+                    .addComponent(cancelBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(16, 16, 16)))
         );
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {cancelBtn, okBtn});
-
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cancelBtn)
-                    .addComponent(okBtn))
+                .addComponent(okBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addContainerGap(168, Short.MAX_VALUE)
+                    .addComponent(cancelBtn1)
+                    .addContainerGap()))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
-        this.setVisible(false);
-    }//GEN-LAST:event_cancelBtnActionPerformed
 
     private void okBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okBtnActionPerformed
         String message = "";
@@ -233,10 +234,14 @@ public class PlaceOrderForm extends javax.swing.JDialog {
 
     }//GEN-LAST:event_okBtnActionPerformed
 
+    private void cancelBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtn1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cancelBtn1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JRadioButton buyRdBtn;
-    private javax.swing.JButton cancelBtn;
+    private javax.swing.JButton cancelBtn1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel nicknameLabel;
