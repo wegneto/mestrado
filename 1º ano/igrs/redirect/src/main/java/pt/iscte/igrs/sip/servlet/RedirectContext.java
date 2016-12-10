@@ -18,12 +18,15 @@ public class RedirectContext extends SipServlet {
 	public static Map<String, User> registar;
 
 	private static Map<String, State> states;
+	
+	public static Map<String, String> activeRooms;
 
 	private static Logger logger = Logger.getLogger(RedirectContext.class.getName());
 
 	public RedirectContext() {
 		registar = new HashMap<String, User>();
 		states = new HashMap<String, State>();
+		activeRooms = new HashMap<String, String>();
 	}
 
 	public void doRequest(SipServletRequest request) throws ServletException, IOException {
@@ -31,16 +34,22 @@ public class RedirectContext extends SipServlet {
 		int response = 0;
 
 		State state = null;
-		String aor = request.getTo().getURI().toString();
-		if (getStates().containsKey(aor)) {
-			state = getStates().get(aor);
+		String from = request.getFrom().getURI().toString();
+		if (getStates().containsKey(from)) {
+			state = getStates().get(from);
 		} else {
 			state = new NotRegistered();
 		}
 
 		if ("REGISTER".equals(method)) {
 			response = state.doRegister(request);
+		} else if ("MESSAGE".equals(method)) {
+			response = state.doMessage(request);
 		}
+		
+		logger.info("Usuários registados: " + registar.size());
+		logger.info("Estados ativos: " + states.size());
+		logger.info("Salas ativas: " + activeRooms.size());
 
 		request.createResponse(response).send();
 	}

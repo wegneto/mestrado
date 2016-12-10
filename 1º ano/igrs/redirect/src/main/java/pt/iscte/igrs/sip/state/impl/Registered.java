@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.sip.Address;
 import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
+import javax.servlet.sip.SipURI;
 
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
@@ -19,7 +20,7 @@ public class Registered extends State {
 	public int doRegister(SipServletRequest request) throws ServletException, IOException {
 		logger.info("Requisição para deresgistar: " + request.getTo());
 		
-		int response = SipServletResponse.SC_NOT_FOUND;
+		int responseCode = SipServletResponse.SC_NOT_FOUND;
 		
 		Address address = request.getAddressHeader("Contact");
 		int expires = request.getExpires();
@@ -37,14 +38,48 @@ public class Registered extends State {
 			
 			logger.info("Usuário deregistado com sucesso: " + aor);
 
-			response = SipServletResponse.SC_OK;
+			responseCode = SipServletResponse.SC_OK;
 		} else if (expires > 0) {
 			logger.info("O parâmetro \"expires\" é maior que 0.");
-			response = SipServletResponse.SC_BAD_REQUEST;
+			responseCode = SipServletResponse.SC_BAD_REQUEST;
 		}
 		
-		return response;
+		return responseCode;
+	}
 
+	@Override
+	public int doMessage(SipServletRequest request) throws ServletException, IOException {
+		logger.info("Mensagem enviada pelo usuário: " + request.getFrom());
+		logger.info("Mensagem enviada para: " + request.getTo());
+		
+		int responseCode = SipServletResponse.SC_UNAUTHORIZED;
+		
+		String host = "";
+		if (request.getFrom().getURI().isSipURI()) {
+			host = ((SipURI) request.getFrom().getURI()).getHost();
+		}
+		
+		String from = request.getFrom().getURI().toString();
+
+		if (host.equals("acme.pt") && RedirectContext.registar.containsKey(from)) {
+			logger.info("Usuário pertence ao domínio 'acme.pt'");
+			
+			String message = request.getContent().toString();
+			if (message.matches("^ativar [\\w]*")) {
+				String sala = message.split("\\s+")[1];
+				logger.info("MESSAGE: Ativando sala " + sala + " para o utilizador " + from);
+				RedirectContext.activeRooms.put(from, sala);
+				
+				logger.info("Definindo o proximo estado para: " + from);
+				RedirectContext.getStates().put(from, new Active());
+				
+				responseCode = SipServletResponse.SC_OK;
+			} else {
+				responseCode = SipServletResponse.SC_BAD_REQUEST;
+			}
+		}
+		
+		return responseCode;
 	}
 	
 }

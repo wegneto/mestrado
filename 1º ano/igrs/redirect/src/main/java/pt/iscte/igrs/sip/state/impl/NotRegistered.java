@@ -22,8 +22,8 @@ public class NotRegistered extends State {
 		logger.info("Requisição para resgistar: " + request.getTo());
 
 		int response = SipServletResponse.SC_FORBIDDEN;
+		
 		String host = "";
-
 		if (request.getTo().getURI().isSipURI()) {
 			host = ((SipURI) request.getTo().getURI()).getHost();
 		}

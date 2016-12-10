@@ -11,5 +11,9 @@ public abstract class State {
 	public int doRegister(SipServletRequest request) throws ServletException, IOException  {
 		return SipServletResponse.SC_BAD_REQUEST;
 	}
+	
+	public int doMessage(SipServletRequest request) throws ServletException, IOException  {
+		return SipServletResponse.SC_BAD_REQUEST;
+	}
 
 }
