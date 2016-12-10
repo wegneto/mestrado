@@ -51,6 +51,8 @@ public class NotRegistered extends State {
 				logger.info("Usuário registado com sucesso: " + user);
 
 				response = SipServletResponse.SC_OK;
+			} else {
+				response = SipServletResponse.SC_BAD_REQUEST;
 			}
 		}
 

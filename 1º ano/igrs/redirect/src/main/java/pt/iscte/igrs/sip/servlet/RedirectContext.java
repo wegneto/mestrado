@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.sip.SipServlet;
 import javax.servlet.sip.SipServletRequest;
+import javax.servlet.sip.SipServletResponse;
 
 import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.state.State;
@@ -18,7 +19,7 @@ public class RedirectContext extends SipServlet {
 	public static Map<String, User> registar;
 
 	private static Map<String, State> states;
-	
+
 	public static Map<String, String> activeRooms;
 
 	private static Logger logger = Logger.getLogger(RedirectContext.class.getName());
@@ -45,13 +46,42 @@ public class RedirectContext extends SipServlet {
 			response = state.doRegister(request);
 		} else if ("MESSAGE".equals(method)) {
 			response = state.doMessage(request);
+		} else if ("INVITE".equals(method)) {
+			response = state.doInvite(request, getServletContext());
+		} else if ("BYE".equals(method)) {
+			state.doBye(request);
 		}
-		
+
 		logger.info("Usuários registados: " + registar.size());
 		logger.info("Estados ativos: " + states.size());
 		logger.info("Salas ativas: " + activeRooms.size());
 
-		request.createResponse(response).send();
+		if (response != 0) {
+			request.createResponse(response).send();
+		}
+	}
+
+	public void doResponse(SipServletResponse response) throws ServletException, IOException {
+		State state = null;
+		String from = response.getFrom().getURI().toString();
+		if (getStates().containsKey(from)) {
+			state = getStates().get(from);
+		} else {
+			state = new NotRegistered();
+		}
+
+		int status = response.getStatus();
+		if (status < 200) {
+			doProvisionalResponse(response);
+		} else {
+			if (status < 300) {
+				state.doSuccessResponse(response);
+			} else if (status < 400) {
+				doRedirectResponse(response);
+			} else {
+				doErrorResponse(response);
+			}
+		}
 	}
 
 	public static Map<String, State> getStates() {
