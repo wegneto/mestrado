@@ -18,9 +18,11 @@ public class RedirectContext extends SipServlet {
 
 	public static Map<String, User> registar;
 
-	private static Map<String, State> states;
+	public static Map<String, State> states;
 
 	public static Map<String, String> activeRooms;
+	
+	public static Map<Integer, String> contactList;
 
 	private static Logger logger = Logger.getLogger(RedirectContext.class.getName());
 
@@ -28,6 +30,8 @@ public class RedirectContext extends SipServlet {
 		registar = new HashMap<String, User>();
 		states = new HashMap<String, State>();
 		activeRooms = new HashMap<String, String>();
+		contactList = new HashMap<Integer, String>();
+		contactList.put(1, "sip:bob@acme.pt:5062");
 	}
 
 	public void doRequest(SipServletRequest request) throws ServletException, IOException {
@@ -35,8 +39,8 @@ public class RedirectContext extends SipServlet {
 
 		State state = null;
 		String from = request.getFrom().getURI().toString();
-		if (getStates().containsKey(from)) {
-			state = getStates().get(from);
+		if (states.containsKey(from)) {
+			state = states.get(from);
 		} else {
 			state = new NotRegistered();
 		}
@@ -49,6 +53,8 @@ public class RedirectContext extends SipServlet {
 			state.doInvite(request, getServletContext());
 		} else if ("BYE".equals(method)) {
 			state.doBye(request);
+		} else if ("INFO".equals(method)) {
+			state.doInfo(request, getServletContext());
 		}
 
 		logger.info("Usuários registados: " + registar.size());
@@ -59,8 +65,8 @@ public class RedirectContext extends SipServlet {
 	public void doResponse(SipServletResponse response) throws ServletException, IOException {
 		State state = null;
 		String from = response.getFrom().getURI().toString();
-		if (getStates().containsKey(from)) {
-			state = getStates().get(from);
+		if (states.containsKey(from)) {
+			state = states.get(from);
 		} else {
 			state = new NotRegistered();
 		}
@@ -70,17 +76,13 @@ public class RedirectContext extends SipServlet {
 			doProvisionalResponse(response);
 		} else {
 			if (status < 300) {
-				state.doSuccessResponse(response);
+				state.doSuccessResponse(response, getServletContext());
 			} else if (status < 400) {
 				doRedirectResponse(response);
 			} else {
 				doErrorResponse(response);
 			}
 		}
-	}
-
-	public static Map<String, State> getStates() {
-		return states;
 	}
 
 }

@@ -44,7 +44,7 @@ public abstract class State {
 					RedirectContext.activeRooms.remove(from);
 
 					logger.info("Definindo o proximo estado para: " + from);
-					RedirectContext.getStates().put(from, new Registered());
+					RedirectContext.states.put(from, new Registered());
 
 					request.createResponse(SipServletResponse.SC_OK).send();
 				} else {
@@ -62,10 +62,13 @@ public abstract class State {
 		request.createResponse(SipServletResponse.SC_UNAUTHORIZED).send();
 	}
 
-	public void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
+	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext) throws ServletException, IOException {
 	}
 
 	public void doBye(SipServletRequest request) throws ServletException, IOException {
+	}
+
+	public  void doInfo(SipServletRequest request, ServletContext servletContext) throws ServletException, IOException{
 	}
 
 }

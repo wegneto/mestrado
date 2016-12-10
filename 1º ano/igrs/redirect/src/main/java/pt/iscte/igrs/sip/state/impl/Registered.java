@@ -31,7 +31,7 @@ public class Registered extends State {
 			RedirectContext.registar.remove(aor);
 
 			logger.info("Definindo o proximo estado para: " + aor);
-			RedirectContext.getStates().put(aor, new NotRegistered());
+			RedirectContext.states.put(aor, new NotRegistered());
 
 			logger.info("Usuário deregistado com sucesso: " + aor);
 
@@ -58,7 +58,7 @@ public class Registered extends State {
 				RedirectContext.activeRooms.put(from, sala);
 
 				logger.info("Definindo o proximo estado para: " + from);
-				RedirectContext.getStates().put(from, new Active());
+				RedirectContext.states.put(from, new Active());
 
 				request.createResponse(SipServletResponse.SC_OK).send();
 			} else {

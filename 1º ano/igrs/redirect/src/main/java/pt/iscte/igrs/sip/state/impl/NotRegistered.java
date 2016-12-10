@@ -44,7 +44,7 @@ public class NotRegistered extends State {
 				
 				RedirectContext.registar.put(user.getAddressOfRecord().toString(), user);
 				logger.info("Definindo o proximo estado para: " + user.getAddressOfRecord().toString());
-				RedirectContext.getStates().put(user.getAddressOfRecord().toString(), new Registered());
+				RedirectContext.states.put(user.getAddressOfRecord().toString(), new Registered());
 				
 				logger.info("Usuário registado com sucesso: " + user);
 

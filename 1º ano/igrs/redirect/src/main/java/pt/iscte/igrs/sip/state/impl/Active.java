@@ -46,7 +46,7 @@ public class Active extends State {
 		forkedRequest.send();
 	}
 
-	public void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
+	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext) throws ServletException, IOException {
 		String from = response.getFrom().getURI().toString();
 
 		if (response.getMethod().indexOf("INVITE") != -1) {
@@ -54,7 +54,7 @@ public class Active extends State {
 			SipServletRequest ackRequest = response.createAck();
 			ackRequest.send();
 
-			RedirectContext.getStates().put(from, new InConference());
+			RedirectContext.states.put(from, new InConference());
 
 			// create and sends OK for the first call leg
 			SipServletRequest originalRequest = (SipServletRequest) response.getSession()
