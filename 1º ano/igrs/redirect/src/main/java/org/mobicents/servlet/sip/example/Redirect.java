@@ -1,6 +1,3 @@
-/*
- * $Id: EchoServlet.java,v 1.5 2003/06/22 12:32:15 fukuda Exp $
- */
 package org.mobicents.servlet.sip.example;
 
 import java.io.IOException;
@@ -20,10 +17,6 @@ import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 import javax.servlet.sip.SipURI;
 
-import org.omg.CORBA.Request;
-
-/**
- */
 public class Redirect extends SipServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -31,7 +24,7 @@ public class Redirect extends SipServlet {
 	static private Map<String, String> Binding;
 
 	private static Map<String, String> salasAtivas;
-
+	
 	private static Logger logger = Logger.getLogger(Redirect.class.getName());
 
 	public Redirect() {
@@ -108,7 +101,6 @@ public class Redirect extends SipServlet {
 	}
 
 	protected void doInfo(SipServletRequest request) throws ServletException, IOException {
-		logger.info("*** Método info ***");
 		String messageContent = new String((byte[]) request.getContent());
 		int signal = Integer.valueOf(messageContent.substring("Signal=".length(), "Signal=".length() + 1).trim());
 
@@ -116,13 +108,15 @@ public class Redirect extends SipServlet {
 		case 1:
 			SipFactory sipFactory = (SipFactory) getServletContext().getAttribute(SIP_FACTORY);
 
-			Address serverAddress = sipFactory.createAddress("sip:bob@acme.pt:5062");
+			Address addressTo = sipFactory.createAddress("sip:bob@acme.pt:5062");
 			SipServletRequest newRequest = sipFactory.createRequest(request.getApplicationSession(), "INVITE",
-					request.getFrom(), serverAddress);
+					request.getFrom(), addressTo);
 
 			if (request.getContent() != null) {
 				newRequest.setContent(request.getContent(), request.getContentType());
 			}
+			newRequest.getSession().setAttribute("participant", Boolean.TRUE);
+			newRequest.getSession().setAttribute("OriginalRequest", request);
 			newRequest.send();
 
 			request.createResponse(SipServletResponse.SC_OK).send();
@@ -163,6 +157,7 @@ public class Redirect extends SipServlet {
 
 				forkedRequest.setRequestURI(sipUri);
 				forkedRequest.getSession().setAttribute("originalRequest", request);
+				forkedRequest.getSession().setAttribute("owner", Boolean.TRUE);
 				forkedRequest.send();
 			} else {
 				// Usuário não tem sala ativa = 401
@@ -181,7 +176,6 @@ public class Redirect extends SipServlet {
 	 *            The SIP message received by the AS
 	 */
 	protected void doResponse(SipServletResponse response) throws ServletException, IOException {
-		logger.info("************ DORESPONSE ***************");
 		super.doResponse(response);
 	}
 
@@ -205,14 +199,36 @@ public class Redirect extends SipServlet {
 	}
 
 	protected void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
+		
+		boolean participant = response.getSession().getAttribute("participant") != null;
+		boolean owner = response.getSession().getAttribute("owner") != null;
+		boolean sbrubles = response.getSession().getAttribute("sbrubles") != null;
+		
 		String to = getSIPuri(response.getHeader("To"));
 
-		if (to.equals("sip:bob@acme.pt")) {
+		//if (to.equals("sip:bob@acme.pt")) {
+		if (participant) {
+			logger.info("***************** PARTICIPANTE");
 			SipServletRequest ackRequest = response.createAck();
 			ackRequest.setContent(response.getContent(), response.getContentType());
 			ackRequest.send();
+			
+			SipFactory sipFactory = (SipFactory) getServletContext().getAttribute(SIP_FACTORY);
 
-		} else if (response.getMethod().indexOf("INVITE") != -1) {
+			Address addressTo = sipFactory.createAddress("sip:sala@acme.pt:5070");
+			SipServletRequest newRequest = sipFactory.createRequest(response.getApplicationSession(), "INVITE",
+					response.getTo(), addressTo);
+
+			if (response.getContent() != null) {
+				newRequest.setContent(response.getContent(), response.getContentType());
+			}
+			newRequest.getSession().setAttribute("sbrubles", Boolean.TRUE);
+			newRequest.getSession().setAttribute("originalRequest", response.getSession().getAttribute("OriginalRequest"));
+			newRequest.send();
+
+		//} else if (response.getMethod().indexOf("INVITE") != -1) {
+		} else if (owner) {
+			logger.info("***************** OWNER");
 			// if this is a response to an INVITE we ack it and forward the OK
 			SipServletRequest ackRequest = response.createAck();
 			ackRequest.send();
@@ -227,6 +243,11 @@ public class Redirect extends SipServlet {
 				responseToOriginalRequest.setContent(response.getContent(), response.getContentType());
 			}
 			responseToOriginalRequest.send();
+		} else if (sbrubles) {
+			logger.info("***************** SBRUBLES");
+			SipServletRequest ackRequest = response.createAck();
+			ackRequest.setContent(response.getContent(), response.getContentType());
+			ackRequest.send();
 		}
 	}
 
