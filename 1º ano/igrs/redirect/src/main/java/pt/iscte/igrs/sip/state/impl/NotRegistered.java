@@ -1,24 +1,21 @@
 package pt.iscte.igrs.sip.state.impl;
 
-import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.sip.Address;
-import javax.servlet.sip.ServletParseException;
 import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipURI;
-import javax.servlet.sip.URI;
 
 import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
 
-public class NonRegistered extends State {
+public class NotRegistered extends State {
 
-	private static Logger logger = Logger.getLogger(NonRegistered.class.getName());
+	private static Logger logger = Logger.getLogger(NotRegistered.class.getName());
 
 	@Override
 	public int doRegister(SipServletRequest request) throws ServletException, IOException {
@@ -48,8 +45,8 @@ public class NonRegistered extends State {
 				user.setContact(address.getURI());
 				
 				RedirectContext.registar.put(user.getAddressOfRecord().toString(), user);
-				
-				request.setAttribute("state", "registered");
+				logger.info("Definindo o proximo estado para: " + user.getAddressOfRecord().toString());
+				RedirectContext.getStates().put(user.getAddressOfRecord().toString(), new Registered());
 				
 				logger.info("Usuário registado com sucesso: " + user);
 
