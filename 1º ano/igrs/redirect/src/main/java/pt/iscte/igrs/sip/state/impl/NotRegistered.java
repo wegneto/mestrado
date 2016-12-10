@@ -18,11 +18,9 @@ public class NotRegistered extends State {
 	private static Logger logger = Logger.getLogger(NotRegistered.class.getName());
 
 	@Override
-	public int doRegister(SipServletRequest request) throws ServletException, IOException {
+	public void doRegister(SipServletRequest request) throws ServletException, IOException {
 		logger.info("Requisição para resgistar: " + request.getTo());
 
-		int response = SipServletResponse.SC_FORBIDDEN;
-		
 		String host = "";
 		if (request.getTo().getURI().isSipURI()) {
 			host = ((SipURI) request.getTo().getURI()).getHost();
@@ -50,13 +48,13 @@ public class NotRegistered extends State {
 				
 				logger.info("Usuário registado com sucesso: " + user);
 
-				response = SipServletResponse.SC_OK;
+				request.createResponse(SipServletResponse.SC_OK).send();
 			} else {
-				response = SipServletResponse.SC_BAD_REQUEST;
+				request.createResponse(SipServletResponse.SC_BAD_REQUEST).send();
 			}
 		}
 
-		return response;
+		request.createResponse(SipServletResponse.SC_FORBIDDEN).send();
 	}
 
 }

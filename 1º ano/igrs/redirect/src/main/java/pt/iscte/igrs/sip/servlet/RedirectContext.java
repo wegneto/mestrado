@@ -32,7 +32,6 @@ public class RedirectContext extends SipServlet {
 
 	public void doRequest(SipServletRequest request) throws ServletException, IOException {
 		String method = request.getMethod();
-		int response = 0;
 
 		State state = null;
 		String from = request.getFrom().getURI().toString();
@@ -43,11 +42,11 @@ public class RedirectContext extends SipServlet {
 		}
 
 		if ("REGISTER".equals(method)) {
-			response = state.doRegister(request);
+			state.doRegister(request);
 		} else if ("MESSAGE".equals(method)) {
-			response = state.doMessage(request);
+			state.doMessage(request);
 		} else if ("INVITE".equals(method)) {
-			response = state.doInvite(request, getServletContext());
+			state.doInvite(request, getServletContext());
 		} else if ("BYE".equals(method)) {
 			state.doBye(request);
 		}
@@ -55,10 +54,6 @@ public class RedirectContext extends SipServlet {
 		logger.info("Usuários registados: " + registar.size());
 		logger.info("Estados ativos: " + states.size());
 		logger.info("Salas ativas: " + activeRooms.size());
-
-		if (response != 0) {
-			request.createResponse(response).send();
-		}
 	}
 
 	public void doResponse(SipServletResponse response) throws ServletException, IOException {

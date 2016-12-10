@@ -17,15 +17,13 @@ public abstract class State {
 
 	private static Logger logger = Logger.getLogger(Active.class.getName());
 
-	public int doRegister(SipServletRequest request) throws ServletException, IOException {
-		return SipServletResponse.SC_BAD_REQUEST;
+	public void doRegister(SipServletRequest request) throws ServletException, IOException {
+		request.createResponse(SipServletResponse.SC_BAD_REQUEST).send();
 	}
 
-	public int doMessage(SipServletRequest request) throws ServletException, IOException {
+	public void doMessage(SipServletRequest request) throws ServletException, IOException {
 		logger.info("Mensagem enviada pelo usuário: " + request.getFrom());
 		logger.info("Mensagem enviada para: " + request.getTo());
-
-		int responseCode = SipServletResponse.SC_UNAUTHORIZED;
 
 		String host = "";
 		if (request.getFrom().getURI().isSipURI()) {
@@ -36,8 +34,6 @@ public abstract class State {
 
 		if (host.equals("acme.pt") && RedirectContext.registar.containsKey(from)) {
 			logger.info("Usuário pertence ao domínio 'acme.pt'");
-
-			responseCode = 0;
 
 			String to = request.getTo().getURI().toString();
 
@@ -50,23 +46,25 @@ public abstract class State {
 					logger.info("Definindo o proximo estado para: " + from);
 					RedirectContext.getStates().put(from, new Registered());
 
-					responseCode = SipServletResponse.SC_OK;
+					request.createResponse(SipServletResponse.SC_OK).send();
 				} else {
-					responseCode = SipServletResponse.SC_BAD_REQUEST;
+					request.createResponse(SipServletResponse.SC_BAD_REQUEST).send();
 				}
 			}
 		}
 
-		return responseCode;
+		request.createResponse(SipServletResponse.SC_UNAUTHORIZED).send();
+
 	}
 
-	public int doInvite(SipServletRequest request, ServletContext servletContext) throws ServletException, IOException {
-		return SipServletResponse.SC_UNAUTHORIZED;
+	public void doInvite(SipServletRequest request, ServletContext servletContext)
+			throws ServletException, IOException {
+		request.createResponse(SipServletResponse.SC_UNAUTHORIZED).send();
 	}
-	
+
 	public void doSuccessResponse(SipServletResponse response) throws ServletException, IOException {
 	}
-	
+
 	public void doBye(SipServletRequest request) throws ServletException, IOException {
 	}
 
