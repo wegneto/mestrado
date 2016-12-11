@@ -2,6 +2,7 @@ package pt.iscte.igrs.sip.servlet;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ public class RedirectContext extends SipServlet {
 	public static Map<String, State> states;
 
 	public static Map<String, String> activeRooms;
-	
+
 	public static Map<Integer, String> contactList;
 
 	private static Logger logger = Logger.getLogger(RedirectContext.class.getName());
@@ -31,19 +32,12 @@ public class RedirectContext extends SipServlet {
 		states = new HashMap<String, State>();
 		activeRooms = new HashMap<String, String>();
 		contactList = new HashMap<Integer, String>();
-		contactList.put(1, "sip:bob@acme.pt:5062");
+		contactList.put(1, "sip:bob@acme.pt");
 	}
-
+	
 	public void doRequest(SipServletRequest request) throws ServletException, IOException {
+		State state = getState(request);
 		String method = request.getMethod();
-
-		State state = null;
-		String from = request.getFrom().getURI().toString();
-		if (states.containsKey(from)) {
-			state = states.get(from);
-		} else {
-			state = new NotRegistered();
-		}
 
 		if ("REGISTER".equals(method)) {
 			state.doRegister(request);
@@ -57,19 +51,11 @@ public class RedirectContext extends SipServlet {
 			state.doInfo(request, getServletContext());
 		}
 
-		logger.info("Usuários registados: " + registar.size());
-		logger.info("Estados ativos: " + states.size());
-		logger.info("Salas ativas: " + activeRooms.size());
+		showInfo();
 	}
 
 	public void doResponse(SipServletResponse response) throws ServletException, IOException {
-		State state = null;
-		String from = response.getFrom().getURI().toString();
-		if (states.containsKey(from)) {
-			state = states.get(from);
-		} else {
-			state = new NotRegistered();
-		}
+		State state = getState(response.getRequest());
 
 		int status = response.getStatus();
 		if (status < 200) {
@@ -83,6 +69,41 @@ public class RedirectContext extends SipServlet {
 				doErrorResponse(response);
 			}
 		}
+		
+		showInfo();
+	}
+	
+	private void showInfo() {
+		logger.info("Quantidade de usuários registados: " + registar.size());
+		logger.info("Usuários registados: " + registar);
+		
+		logger.info("Quantidade de estados ativos: " + states.size());
+		logger.info("Estados ativos: " + states);
+
+		logger.info("Quantidade de salas ativas: " + activeRooms.size());
+		logger.info("Salas ativas: " + activeRooms);
+		
+	}
+
+	private State getState(SipServletRequest request) { 
+		String stateOwner = "";
+		if (request.getAttribute("stateOwner") != null) {
+			User user = (User) request.getAttribute("stateOwner");
+			stateOwner = user.getAddressOfRecord().toString(); 
+		} else {
+			stateOwner = request.getFrom().getURI().toString();
+		}
+		
+		State state = null;
+		if (states.containsKey(stateOwner)) {
+			state = states.get(stateOwner);
+		} else {
+			state = new NotRegistered();
+		}
+		
+		logger.info("**** Estado atual: " + state + " para: " + stateOwner);
+		
+		return state;
 	}
 
 }

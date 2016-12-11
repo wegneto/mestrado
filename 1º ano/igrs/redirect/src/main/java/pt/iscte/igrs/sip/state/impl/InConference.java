@@ -14,6 +14,7 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 
+import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
 
@@ -25,25 +26,27 @@ public class InConference extends State {
 		String messageContent = new String((byte[]) request.getContent());
 		int signal = Integer.valueOf(messageContent.substring("Signal=".length(), "Signal=".length() + 1).trim());
 		String contact = RedirectContext.contactList.get(signal);
+		
+		//TODO Verify if the user is registered
+		User user = RedirectContext.registar.get(contact);
 
 		SipFactory sipFactory = (SipFactory) servletContext.getAttribute(SipServlet.SIP_FACTORY);
 
 		Address addressFrom = sipFactory.createAddress(request.getFrom().getURI());
-		Address addressTo = sipFactory.createAddress(contact);
+		Address addressTo = sipFactory.createAddress(user.getContact());
 		SipServletRequest inviteRequest = sipFactory.createRequest(request.getApplicationSession(), "INVITE",
 				addressFrom, addressTo);
 
 		if (request.getContent() != null) {
 			inviteRequest.setContent(request.getContent(), request.getContentType());
 		}
-		inviteRequest.getSession().setAttribute("ownerRequest", request);
+		inviteRequest.setAttribute("stateOwner", user);
 		inviteRequest.send();
 		
-		String from = request.getFrom().getURI().toString();
-		RedirectContext.states.put(from, new ParticipantInvited());
+		RedirectContext.states.put(request.getFrom().getURI().toString(), new WaitingAnswer());
+		RedirectContext.states.put(user.getAddressOfRecord().toString(), new BeingCalled());
 
 		request.createResponse(SipServletResponse.SC_OK).send();
-
 	}
 
 	public void doBye(SipServletRequest request) throws ServletException, IOException {

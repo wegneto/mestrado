@@ -1,6 +1,7 @@
 package pt.iscte.igrs.sip.state.impl;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -10,12 +11,21 @@ import javax.servlet.sip.SipServlet;
 import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 
+import pt.iscte.igrs.sip.model.User;
+import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
 
-public class ParticipantInvited extends State {
-
+public class BeingCalled extends State {
+	
+	private static Logger logger = Logger.getLogger(BeingCalled.class.getName());
+	
 	@Override
 	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext) throws ServletException, IOException {
+		logger.info("Atendendo chamada e tentando conexão com a sala de conferência");
+		
+		User user = (User) response.getRequest().getAttribute("stateOwner");
+		RedirectContext.states.put(user.getAddressOfRecord().toString(), new Answered());
+		
 		SipServletRequest ackRequest = response.createAck();
 		ackRequest.setContent(response.getContent(), response.getContentType());
 		ackRequest.send();
@@ -29,7 +39,7 @@ public class ParticipantInvited extends State {
 		if (response.getContent() != null) {
 			newRequest.setContent(response.getContent(), response.getContentType());
 		}
-		newRequest.getSession().setAttribute("ownerRequest", response.getSession().getAttribute("ownerRequest"));
+		newRequest.setAttribute("stateOwner", user);
 		newRequest.send();
 	}
 

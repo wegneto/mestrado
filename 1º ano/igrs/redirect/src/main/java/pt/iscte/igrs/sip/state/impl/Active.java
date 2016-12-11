@@ -24,7 +24,8 @@ public class Active extends State {
 	private static Logger logger = Logger.getLogger(Active.class.getName());
 
 	@Override
-	public void doInvite(SipServletRequest request, ServletContext servletContext) throws ServletException, IOException {
+	public void doInvite(SipServletRequest request, ServletContext servletContext)
+			throws ServletException, IOException {
 		logger.info("Requisição para iniciar conferência");
 
 		String from = request.getFrom().getURI().toString();
@@ -42,31 +43,28 @@ public class Active extends State {
 		SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + nomeSala + "@acme.pt:5070");
 
 		forkedRequest.setRequestURI(sipUri);
-		forkedRequest.getSession().setAttribute("originalRequest", request);
+		forkedRequest.setAttribute("originalRequest", request);
 		forkedRequest.send();
 	}
 
-	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext) throws ServletException, IOException {
+	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext)
+			throws ServletException, IOException {
 		String from = response.getFrom().getURI().toString();
 
-		if (response.getMethod().indexOf("INVITE") != -1) {
-			// if this is a response to an INVITE we ack it and forward the OK
-			SipServletRequest ackRequest = response.createAck();
-			ackRequest.send();
+		SipServletRequest ackRequest = response.createAck();
+		ackRequest.send();
 
-			RedirectContext.states.put(from, new InConference());
+		RedirectContext.states.put(from, new InConference());
 
-			// create and sends OK for the first call leg
-			SipServletRequest originalRequest = (SipServletRequest) response.getSession()
-					.getAttribute("originalRequest");
-			SipServletResponse responseToOriginalRequest = originalRequest.createResponse(response.getStatus());
+		// create and sends OK for the first call leg
+		SipServletRequest originalRequest = (SipServletRequest) response.getRequest().getAttribute("originalRequest");
+		SipServletResponse responseToOriginalRequest = originalRequest.createResponse(response.getStatus());
 
-			responseToOriginalRequest.setContentLength(response.getContentLength());
-			if (response.getContent() != null && response.getContentType() != null) {
-				responseToOriginalRequest.setContent(response.getContent(), response.getContentType());
-			}
-			responseToOriginalRequest.send();
+		responseToOriginalRequest.setContentLength(response.getContentLength());
+		if (response.getContent() != null && response.getContentType() != null) {
+			responseToOriginalRequest.setContent(response.getContent(), response.getContentType());
 		}
+		responseToOriginalRequest.send();
 	}
 
 }

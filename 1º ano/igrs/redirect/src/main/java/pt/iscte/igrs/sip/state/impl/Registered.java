@@ -44,6 +44,7 @@ public class Registered extends State {
 
 	@Override
 	public void doMessage(SipServletRequest request) throws ServletException, IOException {
+		logger.info("Mensagem solicitando ativação da sala");
 		logger.info("Mensagem enviada pelo usuário: " + request.getFrom());
 		logger.info("Mensagem enviada para: " + request.getTo());
 
