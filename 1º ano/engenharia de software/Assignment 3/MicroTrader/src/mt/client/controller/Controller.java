@@ -1,5 +1,8 @@
 package mt.client.controller;
 
+import mt.exception.AuthenticationException;
+import mt.exception.ConnectionClosedException;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
@@ -17,7 +20,7 @@ public class Controller {
 
 	/**
 	 * Asks to the ClientComm to establish a connection to a MicroTrader server.
-	 * 
+	 *
 	 * @param host
 	 *            Address of the server. For instance "localhost",
 	 *            "192.168.1.1", and or similar.
@@ -41,7 +44,7 @@ public class Controller {
 
 	/**
 	 * Check if an user is currently connected to a host.
-	 * 
+	 *
 	 * @return <b>true</b> if currently connected to a host, <b>false</b>
 	 *         otherwise.
 	 */
@@ -59,7 +62,7 @@ public class Controller {
 
 	/**
 	 * Identify the currently logged user.
-	 * 
+	 *
 	 * @return the name of the logged user
 	 */
 	public String getLoggedUser() {
@@ -68,7 +71,7 @@ public class Controller {
 
 	/**
 	 * Asks the ClientComm interface to send an order to the server.
-	 * 
+	 *
 	 * @param order
 	 *            The MicroTrader order to send.
 	 */
@@ -80,14 +83,29 @@ public class Controller {
 		}
 	}
 
+	public void sendBatchOrders() throws Exception {
+		if (Session.clientComm.isConnected()) {
+			for (int i = 1; i < 10; i++) {
+				if (i % 2 == 0) {
+					sendOrder(Order.createBuyOrder(getLoggedUser(), "AUTO#" + i, i, i));
+				} else {
+					sendOrder(Order.createSellOrder(getLoggedUser(), "AUTO#" + i, i, i));
+				}
+			}
+
+		} else {
+			throw new Exception("You're not connected to any server.");
+		}
+	}
+
 	/**
 	 * Browse the orders pending in the ClientComm interface.
-	 * 
+	 *
 	 * @throws Exception
 	 *             Thrown if the user was disconnected from the server or if
 	 *             there is some error message.
 	 */
-	public void browseOrders() throws Exception {
+	public void browseMessages() throws Exception {
 		while (Session.clientComm.hasNextMessage()) {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Processing new messages");
 			ClientSideMessage message = Session.clientComm.getNextMessage();
@@ -123,7 +141,16 @@ public class Controller {
 					}
 				}
 			} else if (message.getType() == ClientSideMessage.Type.ERROR) {
+				if (message.getError().matches("The nickname '[\\w]*' is already in use and connected.")) {
+					this.disconnect();
+					throw new AuthenticationException(message.getError());
+				} else if (message.getError().matches("The connection for client '[\\w]*' was closed by the server.")) {
+					this.disconnect();
+					throw new ConnectionClosedException(message.getError());
+				}
+
 				throw new Exception(message.getError());
+
 			}
 		}
 	}

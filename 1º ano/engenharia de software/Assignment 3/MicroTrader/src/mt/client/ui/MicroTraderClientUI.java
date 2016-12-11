@@ -1,5 +1,6 @@
 package mt.client.ui;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
@@ -9,7 +10,12 @@ import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import mt.client.controller.Controller;
 import mt.client.Session;
+import mt.exception.AuthenticationException;
 
+/**
+ * Main screen of the Micro Trader.
+ *
+ */
 public class MicroTraderClientUI extends javax.swing.JFrame {
 
     private Timer timer;
@@ -117,7 +123,7 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
 
         jMenu2.setText("Orders");
 
-        jMenuItem2.setText("Generate");
+        jMenuItem2.setText("Create Batch");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem2ActionPerformed(evt);
@@ -160,8 +166,8 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
             form.setLocationRelativeTo(this);
             form.setVisible(true);
             if (controller.isConnected()) {
+                browseMessages(this);
                 setTitle(screenTitle + " | Connected user: " + controller.getLoggedUser());
-                browseOrders();
             }
         } else {
             JOptionPane.showMessageDialog(this, "You are already connected to a server. \nNavigate to File > Disconnect before connecting with new nickname.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -220,7 +226,15 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
     }//GEN-LAST:event_windowClosing
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
+        if (controller.isConnected()) {
+            try {
+                controller.sendBatchOrders();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "You must be connected to a server to place orders. \nNavigate to File > Connect.", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -240,17 +254,25 @@ public class MicroTraderClientUI extends javax.swing.JFrame {
     private javax.swing.JTable unfulfilledOrdersTable;
     // End of variables declaration//GEN-END:variables
 
-    private void browseOrders() {
+    private void browseMessages(Component parentComponent) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Browse orders.");
         timer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    new Controller().browseOrders();
+                    new Controller().browseMessages();
                     unfulfilledOrdersTable.setModel(new OrderTableModel(Session.orders));
                     myOrdersTable.setModel(new OrderTableModel(Session.history));
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Error",
+                    
+                    if (ex instanceof AuthenticationException) {
+                        timer.stop();
+                        unfulfilledOrdersTable.setModel(new DefaultTableModel());
+                        myOrdersTable.setModel(new DefaultTableModel());
+                        setTitle(screenTitle + " | (Disconnected)");
+                    }
+                    
+                    JOptionPane.showMessageDialog(parentComponent, ex.getMessage(), "Error",
                         JOptionPane.ERROR_MESSAGE);
                 }
             }

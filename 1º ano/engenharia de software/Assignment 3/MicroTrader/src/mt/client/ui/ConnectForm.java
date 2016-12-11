@@ -3,7 +3,6 @@ package mt.client.ui;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import mt.client.controller.Controller;
-import mt.comm.ClientComm;
 
 /**
  *

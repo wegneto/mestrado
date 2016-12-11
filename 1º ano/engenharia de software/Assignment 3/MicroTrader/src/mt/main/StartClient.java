@@ -10,11 +10,11 @@ import mt.comm.impl.ClientCommImpl;
 
 public class StartClient {
 
-	public static void main(String args[]) {
-		ClientComm clientComm = new ClientCommImpl();
-		MicroTraderClient client = new MicroTraderClientImpl();
-		client.start(clientComm);
-		Logger.getLogger(MicroTraderClientImpl.class.getName()).log(Level.INFO, "This is the end...");
-	}
+    public static void main(String args[]) {
+        ClientComm clientComm = new ClientCommImpl();
+        MicroTraderClient client = new MicroTraderClientImpl();
+        client.start(clientComm);
+        Logger.getLogger(MicroTraderClientImpl.class.getName()).log(Level.INFO, "This is the end...");
+    }
 
 }
