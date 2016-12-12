@@ -44,7 +44,7 @@ public class InConference extends State {
 		inviteRequest.send();
 		
 		RedirectContext.states.put(request.getFrom().getURI().toString(), new WaitingAnswer());
-		RedirectContext.states.put(user.getAddressOfRecord().toString(), new BeingCalled());
+		RedirectContext.states.put(user.getAddressOfRecord().toString(), new Invited());
 
 		request.createResponse(SipServletResponse.SC_OK).send();
 	}
@@ -53,7 +53,7 @@ public class InConference extends State {
 		// we send the OK directly to the first call leg
 		SipServletResponse sipServletResponse = request.createResponse(SipServletResponse.SC_OK);
 		sipServletResponse.send();
-
+		
 		// we forward the BYE
 		SipSession session = request.getSession();
 		B2buaHelper helper = request.getB2buaHelper();
@@ -64,7 +64,7 @@ public class InConference extends State {
 		if (session != null && session.isValid()) {
 			session.invalidate();
 		}
-
+		
 		String from = request.getFrom().getURI().toString();
 		RedirectContext.states.put(from, new Active());
 	}

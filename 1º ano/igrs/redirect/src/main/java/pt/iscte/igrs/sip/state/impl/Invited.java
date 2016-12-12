@@ -15,9 +15,9 @@ import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
 
-public class BeingCalled extends State {
+public class Invited extends State {
 	
-	private static Logger logger = Logger.getLogger(BeingCalled.class.getName());
+	private static Logger logger = Logger.getLogger(Invited.class.getName());
 	
 	@Override
 	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext) throws ServletException, IOException {

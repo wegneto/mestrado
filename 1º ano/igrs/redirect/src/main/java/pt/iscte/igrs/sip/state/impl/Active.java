@@ -14,6 +14,7 @@ import javax.servlet.sip.SipFactory;
 import javax.servlet.sip.SipServlet;
 import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
+import javax.servlet.sip.SipSession;
 import javax.servlet.sip.SipURI;
 
 import pt.iscte.igrs.sip.servlet.RedirectContext;
@@ -43,24 +44,23 @@ public class Active extends State {
 		SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + nomeSala + "@acme.pt:5070");
 
 		forkedRequest.setRequestURI(sipUri);
-		forkedRequest.setAttribute("originalRequest", request);
 		forkedRequest.send();
 	}
 
 	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext)
 			throws ServletException, IOException {
-		String from = response.getFrom().getURI().toString();
-
 		SipServletRequest ackRequest = response.createAck();
 		ackRequest.send();
 
+		String from = response.getFrom().getURI().toString();
 		RedirectContext.states.put(from, new InConference());
 
 		// create and sends OK for the first call leg
-		SipServletRequest originalRequest = (SipServletRequest) response.getRequest().getAttribute("originalRequest");
-		SipServletResponse responseToOriginalRequest = originalRequest.createResponse(response.getStatus());
-
-		responseToOriginalRequest.setContentLength(response.getContentLength());
+		SipSession session = response.getRequest().getSession();
+		B2buaHelper helper = response.getRequest().getB2buaHelper();
+		SipSession linkedSession = helper.getLinkedSession(session);
+		
+		SipServletResponse responseToOriginalRequest = helper.createResponseToOriginalRequest(linkedSession, response.getStatus(), "OK");
 		if (response.getContent() != null && response.getContentType() != null) {
 			responseToOriginalRequest.setContent(response.getContent(), response.getContentType());
 		}

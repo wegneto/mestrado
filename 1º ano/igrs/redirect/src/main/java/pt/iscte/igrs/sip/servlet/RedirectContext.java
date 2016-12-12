@@ -82,15 +82,16 @@ public class RedirectContext extends SipServlet {
 
 		logger.info("Quantidade de salas ativas: " + activeRooms.size());
 		logger.info("Salas ativas: " + activeRooms);
-		
 	}
 
 	private State getState(SipServletRequest request) { 
 		String stateOwner = "";
 		if (request.getAttribute("stateOwner") != null) {
+			logger.info("Usando o atributo stateOwner");
 			User user = (User) request.getAttribute("stateOwner");
 			stateOwner = user.getAddressOfRecord().toString(); 
 		} else {
+			logger.info("Usando o atributo FROM");
 			stateOwner = request.getFrom().getURI().toString();
 		}
 		
