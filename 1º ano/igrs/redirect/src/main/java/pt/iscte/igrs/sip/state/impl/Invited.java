@@ -21,8 +21,6 @@ public class Invited extends State {
 	
 	@Override
 	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext) throws ServletException, IOException {
-		logger.info("Atendendo chamada e tentando conexão com a sala de conferência");
-		
 		User user = (User) response.getRequest().getAttribute("stateOwner");
 		RedirectContext.states.put(user.getAddressOfRecord().toString(), new Answered());
 		
@@ -31,14 +29,18 @@ public class Invited extends State {
 		ackRequest.send();
 		
 		SipFactory sipFactory = (SipFactory) servletContext.getAttribute(SipServlet.SIP_FACTORY);
+		
+		String from = response.getFrom().getURI().toString();
+		String roomId = RedirectContext.activeRooms.get(from);
 
-		Address addressTo = sipFactory.createAddress("sip:sala@acme.pt:5070");
+		Address addressTo = sipFactory.createAddress("sip:" + roomId + "@acme.pt:5070");
 		SipServletRequest newRequest = sipFactory.createRequest(response.getApplicationSession(), "INVITE",
 				response.getTo(), addressTo);
 
 		if (response.getContent() != null) {
 			newRequest.setContent(response.getContent(), response.getContentType());
 		}
+		newRequest.setAttribute("replyTo", from);
 		newRequest.setAttribute("stateOwner", user);
 		newRequest.send();
 	}

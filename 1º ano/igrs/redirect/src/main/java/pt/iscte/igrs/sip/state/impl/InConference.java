@@ -3,7 +3,6 @@ package pt.iscte.igrs.sip.state.impl;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.sip.Address;

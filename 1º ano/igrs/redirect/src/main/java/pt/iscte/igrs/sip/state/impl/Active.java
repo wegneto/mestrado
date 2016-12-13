@@ -27,21 +27,21 @@ public class Active extends State {
 	@Override
 	public void doInvite(SipServletRequest request, ServletContext servletContext)
 			throws ServletException, IOException {
-		logger.info("Requisição para iniciar conferência");
-
 		String from = request.getFrom().getURI().toString();
-
+		
+		RedirectContext.sessions.put(from, request.getSession());
+		
 		SipFactory sipFactory = (SipFactory) servletContext.getAttribute(SipServlet.SIP_FACTORY);
-		String nomeSala = RedirectContext.activeRooms.get(from);
+		String roomId = RedirectContext.activeRooms.get(from);
 
 		Map<String, List<String>> headers = new HashMap<String, List<String>>();
 		List<String> toHeaderSet = new ArrayList<String>();
-		toHeaderSet.add("sip:" + nomeSala + "@acme.pt");
+		toHeaderSet.add("sip:" + roomId + "@acme.pt");
 		headers.put("To", toHeaderSet);
 
 		B2buaHelper helper = request.getB2buaHelper();
 		SipServletRequest forkedRequest = helper.createRequest(request, true, headers);
-		SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + nomeSala + "@acme.pt:5070");
+		SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + roomId + "@acme.pt:5070");
 
 		forkedRequest.setRequestURI(sipUri);
 		forkedRequest.send();
@@ -55,7 +55,6 @@ public class Active extends State {
 		String from = response.getFrom().getURI().toString();
 		RedirectContext.states.put(from, new InConference());
 
-		// create and sends OK for the first call leg
 		SipSession session = response.getRequest().getSession();
 		B2buaHelper helper = response.getRequest().getB2buaHelper();
 		SipSession linkedSession = helper.getLinkedSession(session);

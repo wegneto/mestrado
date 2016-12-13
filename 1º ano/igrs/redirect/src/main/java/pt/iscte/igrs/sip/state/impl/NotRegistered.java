@@ -19,16 +19,12 @@ public class NotRegistered extends State {
 
 	@Override
 	public void doRegister(SipServletRequest request) throws ServletException, IOException {
-		logger.info("Requisição para resgistar: " + request.getTo());
-
 		String host = "";
 		if (request.getTo().getURI().isSipURI()) {
 			host = ((SipURI) request.getTo().getURI()).getHost();
 		}
 
 		if (host.equals("acme.pt")) {
-			logger.info("Usuário pertence ao domínio 'acme.pt'");
-
 			Address address = request.getAddressHeader("Contact");
 
 			int expires = request.getExpires();
@@ -43,11 +39,8 @@ public class NotRegistered extends State {
 				user.setContact(address.getURI());
 				
 				RedirectContext.registar.put(user.getAddressOfRecord().toString(), user);
-				logger.info("Definindo o proximo estado para: " + user.getAddressOfRecord().toString());
 				RedirectContext.states.put(user.getAddressOfRecord().toString(), new Registered());
 				
-				logger.info("Usuário registado com sucesso: " + user);
-
 				request.createResponse(SipServletResponse.SC_OK).send();
 			} else {
 				request.createResponse(SipServletResponse.SC_BAD_REQUEST).send();
