@@ -14,7 +14,7 @@ import pt.iscte.igrs.sip.state.impl.Active;
 import pt.iscte.igrs.sip.state.impl.Registered;
 
 public abstract class State {
-
+	
 	private static Logger logger = Logger.getLogger(Active.class.getName());
 
 	public void doRegister(SipServletRequest request) throws ServletException, IOException {

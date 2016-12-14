@@ -17,6 +17,7 @@ import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 import javax.servlet.sip.SipURI;
 
+import pt.iscte.igrs.sip.model.ConferenceRoom;
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
 
@@ -32,16 +33,16 @@ public class Active extends State {
 		RedirectContext.sessions.put(from, request.getSession());
 		
 		SipFactory sipFactory = (SipFactory) servletContext.getAttribute(SipServlet.SIP_FACTORY);
-		String roomId = RedirectContext.activeRooms.get(from);
+		ConferenceRoom confRoom = RedirectContext.activeRooms.get(from);
 
 		Map<String, List<String>> headers = new HashMap<String, List<String>>();
 		List<String> toHeaderSet = new ArrayList<String>();
-		toHeaderSet.add("sip:" + roomId + "@acme.pt");
+		toHeaderSet.add("sip:" + confRoom.getName() + "@acme.pt");
 		headers.put("To", toHeaderSet);
 
 		B2buaHelper helper = request.getB2buaHelper();
 		SipServletRequest forkedRequest = helper.createRequest(request, true, headers);
-		SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + roomId + "@acme.pt:5070");
+		SipURI sipUri = (SipURI) sipFactory.createURI("sip:" + confRoom.getName() + "@acme.pt:5070");
 
 		forkedRequest.setRequestURI(sipUri);
 		forkedRequest.send();

@@ -17,6 +17,7 @@ public class WaitingAnswer extends State {
 	@Override
 	public void doSuccessResponse(SipServletResponse response, ServletContext servletContext)
 			throws ServletException, IOException {
+		response.getRequest().removeAttribute("stateOwner");
 		RedirectContext.states.put(response.getRequest().getTo().getURI().toString(), new InConference());
 	}
 

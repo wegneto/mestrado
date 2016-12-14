@@ -13,6 +13,7 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 
+import pt.iscte.igrs.sip.model.ConferenceRoom;
 import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
@@ -22,28 +23,27 @@ public class InConference extends State {
 	private static Logger logger = Logger.getLogger(InConference.class.getName());
 
 	public void doInfo(SipServletRequest request, ServletContext servletContext) throws ServletException, IOException {
+		User userFrom = RedirectContext.registar.get(request.getFrom().getURI().toString());
+		
 		String messageContent = new String((byte[]) request.getContent());
 		int signal = Integer.valueOf(messageContent.substring("Signal=".length(), "Signal=".length() + 1).trim());
 		String contact = RedirectContext.contactList.get(signal);
 		
 		//TODO Verify if the user is registered
-		User user = RedirectContext.registar.get(contact);
+		User userTo = RedirectContext.registar.get(contact);
 
 		SipFactory sipFactory = (SipFactory) servletContext.getAttribute(SipServlet.SIP_FACTORY);
 
-		Address addressFrom = sipFactory.createAddress(request.getFrom().getURI());
-		Address addressTo = sipFactory.createAddress(user.getContact());
+		Address addressFrom = sipFactory.createAddress(userFrom.getAddressOfRecord());
+		Address addressTo = sipFactory.createAddress(userTo.getContact());
 		SipServletRequest inviteRequest = sipFactory.createRequest(request.getApplicationSession(), "INVITE",
 				addressFrom, addressTo);
 
-		if (request.getContent() != null) {
-			inviteRequest.setContent(request.getContent(), request.getContentType());
-		}
-		inviteRequest.setAttribute("stateOwner", user);
+		inviteRequest.setAttribute("stateOwner", userTo);
 		inviteRequest.send();
 		
-		RedirectContext.states.put(request.getFrom().getURI().toString(), new WaitingAnswer());
-		RedirectContext.states.put(user.getAddressOfRecord().toString(), new Invited());
+		RedirectContext.states.put(userFrom.getAddressOfRecord().toString(), new WaitingAnswer());
+		RedirectContext.states.put(userTo.getAddressOfRecord().toString(), new Invited());
 
 		request.createResponse(SipServletResponse.SC_OK).send();
 	}
@@ -65,6 +65,24 @@ public class InConference extends State {
 		}
 		
 		String from = request.getFrom().getURI().toString();
+		ConferenceRoom confRoom = RedirectContext.activeRooms.get(from);
+		if (!confRoom.getUsers().isEmpty()) {
+			for (User user : confRoom.getUsers()) {
+				if (RedirectContext.sessions.containsKey(user.getAddressOfRecord().toString())) {
+					SipSession tmpSession = RedirectContext.sessions.get(user.getAddressOfRecord().toString());
+					SipServletRequest tmpRequest = tmpSession.createRequest("BYE");
+					tmpRequest.send();
+					
+					helper = tmpRequest.getB2buaHelper();
+					SipSession tmpLinkedSession = helper.getLinkedSession(tmpSession);
+					SipServletRequest tmpForkedRequest = tmpLinkedSession.createRequest("BYE");
+					tmpForkedRequest.send();
+					
+					RedirectContext.states.put(user.getAddressOfRecord().toString(), new Registered());
+				}
+			}
+		}
+		
 		RedirectContext.states.put(from, new Active());
 	}
 

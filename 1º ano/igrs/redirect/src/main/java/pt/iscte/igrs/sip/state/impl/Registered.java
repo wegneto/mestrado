@@ -9,6 +9,8 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 
+import pt.iscte.igrs.sip.Registrar;
+import pt.iscte.igrs.sip.model.ConferenceRoom;
 import pt.iscte.igrs.sip.servlet.RedirectContext;
 import pt.iscte.igrs.sip.state.State;
 
@@ -43,9 +45,10 @@ public class Registered extends State {
 		if (to.equals("sip:conference@acme.pt")) {
 			String message = request.getContent().toString();
 			if (message.matches("^ativar [\\w]*")) {
-				String roomId = message.split("\\s+")[1];
+				ConferenceRoom confRoom = new ConferenceRoom();
+				confRoom.setName(message.split("\\s+")[1]);
 
-				RedirectContext.activeRooms.put(from, roomId);
+				RedirectContext.activeRooms.put(from, confRoom);
 				RedirectContext.states.put(from, new Active());
 
 				request.createResponse(SipServletResponse.SC_OK).send();

@@ -1,14 +1,26 @@
 package pt.iscte.igrs.sip.model;
 
+import java.util.UUID;
+
 import javax.servlet.sip.URI;
 
 public class User {
+	
+	private UUID id;
 
 	private String username;
 
 	private URI addressOfRecord;
 
 	private URI contact;
+	
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
 
 	public String getUsername() {
 		return username;
@@ -38,5 +50,5 @@ public class User {
 	public String toString() {
 		return "User [username=" + username + ", addressOfRecord=" + addressOfRecord + ", contact=" + contact + "]";
 	}
-
+	
 }

@@ -11,6 +11,8 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 
+import pt.iscte.igrs.sip.Registrar;
+import pt.iscte.igrs.sip.model.ConferenceRoom;
 import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.state.State;
 import pt.iscte.igrs.sip.state.impl.NotRegistered;
@@ -21,7 +23,7 @@ public class RedirectContext extends SipServlet {
 
 	public static Map<String, State> states;
 
-	public static Map<String, String> activeRooms;
+	public static Map<String, ConferenceRoom> activeRooms;
 
 	public static Map<Integer, String> contactList;
 	
@@ -32,7 +34,7 @@ public class RedirectContext extends SipServlet {
 	public RedirectContext() {
 		registar = new HashMap<String, User>();
 		states = new HashMap<String, State>();
-		activeRooms = new HashMap<String, String>();
+		activeRooms = new HashMap<String, ConferenceRoom>();
 		contactList = new HashMap<Integer, String>();
 		contactList.put(1, "sip:bob@acme.pt");
 		sessions = new HashMap<String, SipSession>(); 
@@ -41,8 +43,6 @@ public class RedirectContext extends SipServlet {
 	public void doRequest(SipServletRequest request) throws ServletException, IOException {
 		State state = getState(request);
 		String method = request.getMethod();
-		
-		logger.info("Estados ativos: " + states);
 		
 		if ("REGISTER".equals(method)) {
 			state.doRegister(request);
@@ -55,6 +55,8 @@ public class RedirectContext extends SipServlet {
 		} else if ("INFO".equals(method)) {
 			state.doInfo(request, getServletContext());
 		}
+		
+		logger.info("Usuários registados" + Registrar.getInstance().getAll());
 
 		//showInfo();
 	}
@@ -62,8 +64,6 @@ public class RedirectContext extends SipServlet {
 	public void doResponse(SipServletResponse response) throws ServletException, IOException {
 		State state = getState(response.getRequest());
 		
-		logger.info("Estados ativos: " + states);
-
 		int status = response.getStatus();
 		if (status < 200) {
 			doProvisionalResponse(response);
@@ -96,17 +96,28 @@ public class RedirectContext extends SipServlet {
 		if (request.getAttribute("stateOwner") != null) {
 			User user = (User) request.getAttribute("stateOwner");
 			stateOwner = user.getAddressOfRecord().toString(); 
+			logger.info("1 - Buscando do atributo stateOwner: " + stateOwner);
 		} else {
 			stateOwner = request.getFrom().getURI().toString();
+			logger.info("2 - Buscando do campo from: " + stateOwner);
 		}
+		
+		logger.info("3 - Estados atuais: " + states);
 		
 		State state = null;
 		if (states.containsKey(stateOwner)) {
 			state = states.get(stateOwner);
 		} else {
 			state = new NotRegistered();
+			//GoHorse
+			if (registar.containsKey(stateOwner)) {
+				User user = registar.get(stateOwner);
+				state = states.get(user.getAddressOfRecord().toString());
+			}
+			//GoHorse
 		}
 		
+		logger.info("4 - Retornando: " + state);
 		return state;
 	}
 
