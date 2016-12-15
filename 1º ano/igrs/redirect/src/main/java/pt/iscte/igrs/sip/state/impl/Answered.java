@@ -36,7 +36,7 @@ public class Answered extends State {
 		SipSession session = RedirectContext.sessions.get(replyTo.getAddressOfRecord().toString());
 		SipServletRequest infoRequest = session.createRequest("INFO");
 
-		//infoRequest.setContent(RedirectContext.content, RedirectContext.contentType);
+		infoRequest.setContent("Signal=0\r\n".getBytes(), "application/dtmf-relay");
 
 		infoRequest.setAttribute("stateOwner", replyTo);
 		infoRequest.send();
