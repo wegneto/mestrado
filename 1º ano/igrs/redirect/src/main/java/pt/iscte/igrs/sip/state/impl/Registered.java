@@ -41,9 +41,9 @@ public class Registered extends State {
 	public void doMessage(SipServletRequest request) throws ServletException, IOException {
 		String from = request.getFrom().getURI().toString();
 		String to = request.getTo().getURI().toString();
-
+		
 		if (to.equals("sip:conference@acme.pt")) {
-			String message = request.getContent().toString();
+			String message = request.getContent().toString().trim();
 			if (message.matches("^ativar [\\w]*")) {
 				ConferenceRoom confRoom = new ConferenceRoom();
 				confRoom.setName(message.split("\\s+")[1]);
