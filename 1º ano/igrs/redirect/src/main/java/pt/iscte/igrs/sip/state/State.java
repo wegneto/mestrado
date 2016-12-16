@@ -38,7 +38,7 @@ public abstract class State {
 			String to = request.getTo().getURI().toString();
 
 			if (to.equals("sip:conference@acme.pt")) {
-				String message = request.getContent().toString();
+				String message = request.getContent().toString().trim();
 				if (message.matches("^desativar")) {
 					logger.info("MESSAGE: Destivando sala para o utilizador " + from);
 					RedirectContext.activeRooms.remove(from);
