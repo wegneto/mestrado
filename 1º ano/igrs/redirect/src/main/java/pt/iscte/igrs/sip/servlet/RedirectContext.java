@@ -11,7 +11,6 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipServletResponse;
 import javax.servlet.sip.SipSession;
 
-import pt.iscte.igrs.sip.Registrar;
 import pt.iscte.igrs.sip.model.ConferenceRoom;
 import pt.iscte.igrs.sip.model.User;
 import pt.iscte.igrs.sip.state.State;
@@ -56,9 +55,7 @@ public class RedirectContext extends SipServlet {
 			state.doInfo(request, getServletContext());
 		}
 		
-		logger.info("Usuários registados" + Registrar.getInstance().getAll());
-
-		//showInfo();
+		showInfo();
 	}
 
 	public void doResponse(SipServletResponse response) throws ServletException, IOException {
@@ -77,7 +74,7 @@ public class RedirectContext extends SipServlet {
 			}
 		}
 		
-		//showInfo();
+		showInfo();
 	}
 	
 	private void showInfo() {
@@ -96,13 +93,9 @@ public class RedirectContext extends SipServlet {
 		if (request.getAttribute("stateOwner") != null) {
 			User user = (User) request.getAttribute("stateOwner");
 			stateOwner = user.getAddressOfRecord().toString(); 
-			logger.info("1 - Buscando do atributo stateOwner: " + stateOwner);
 		} else {
 			stateOwner = request.getFrom().getURI().toString();
-			logger.info("2 - Buscando do campo from: " + stateOwner);
 		}
-		
-		logger.info("3 - Estados atuais: " + states);
 		
 		State state = null;
 		if (states.containsKey(stateOwner)) {
@@ -117,7 +110,6 @@ public class RedirectContext extends SipServlet {
 			//GoHorse
 		}
 		
-		logger.info("4 - Retornando: " + state);
 		return state;
 	}
 
